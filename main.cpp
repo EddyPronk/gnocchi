@@ -1,22 +1,22 @@
-/* Dump a gcov file, for debugging use.
-   Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
-   Contributed by Nathan Sidwell <nathan@codesourcery.com>
+/* NPath complexity analyser for C++.
+   Copyright (C) 2007  Eddy Pronk
 
-Gcov is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+Gnocchi is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
-Gcov is distributed in the hope that it will be useful,
+Gnocchi is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Gcov; see the file COPYING.  If not, write to
-the Free Software Foundation, 51 Franklin Street, Fifth Floor,
+along with GNU Emacs; see the file COPYING.  If not, write to
+the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.  */
 
+#include <iostream>
 #include "gcov_reader.hpp"
 
 extern "C"
@@ -24,11 +24,22 @@ extern "C"
 
 #include "config.h"
 #include "system.h"
-#include "coretypes.h"
-#include "tm.h"
 #include "version.h"
 #include <getopt.h>
 }
+
+class report_printer : public reporter
+{
+public:
+	virtual void on_function(const std::string& fn, int npath, int npathpp)
+	{
+		std::cout
+			<< npath << " "
+			<< npathpp << " "
+			<< fn << std::endl;
+
+	}
+};
 
 
 //static void print_prefix (const char *, unsigned, gcov_position_t);
@@ -74,8 +85,10 @@ main (int argc ATTRIBUTE_UNUSED, char **argv)
 		}
     }
 
+	report_printer r;
+	gcov_reader reader(r);
 	while (argv[optind])
-		dump_file (argv[optind++]);
+		reader.open(argv[optind++]);
 	return 0;
 }
 
@@ -93,8 +106,8 @@ print_usage (void)
 static void
 print_version (void)
 {
-	//printf ("gcov-dump (GCC) %s\n", version_string);
-  printf ("Copyright (C) 2006 Free Software Foundation, Inc.\n");
+  printf ("gnocchi %s\n", version_string);
+  printf ("Copyright (C) 2007 Eddy Pronk.\n");
   printf ("This is free software; see the source for copying conditions.\n"
   	  "There is NO warranty; not even for MERCHANTABILITY or \n"
 	  "FITNESS FOR A PARTICULAR PURPOSE.\n\n");

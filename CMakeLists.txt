@@ -26,7 +26,7 @@ ADD_EXECUTABLE(gnocchi
 
 ADD_LIBRARY(test_input test_input.c)
 
-ADD_EXECUTABLE(test_npath test_npath.cpp)
+ADD_EXECUTABLE(system_test_1 system_test_1.cpp)
 
-ADD_TEST(test_npath test_npath)
+ADD_TEST(system_test_1 system_test_1)
 

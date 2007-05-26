@@ -1,8 +1,31 @@
+/* NPath complexity analyser for C++.
+   Copyright (C) 2007  Eddy Pronk
+
+Derived from gcov-dump, which is part of GCC
+Copyright (C) 2002, 2003, 2004,
+              2005, 2006 Free Software Foundation, Inc.
+Contributed by Nathan Sidwell <nathan@codesourcery.com>
+
+Gnocchi is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+Gnocchi is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs; see the file COPYING.  If not, write to
+the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA 02110-1301, USA.  */
+
+#include "gcov_reader.hpp"
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/visitors.hpp>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/reverse_graph.hpp>
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphviz.hpp>
 
 typedef boost::adjacency_list<> Graph;
@@ -14,10 +37,6 @@ extern "C"
 
 #include "config.h"
 #include "system.h"
-#include "coretypes.h"
-#include "tm.h"
-#include "version.h"
-#include <getopt.h>
 
 #define IN_GCOV (-1)
 
@@ -52,62 +71,8 @@ static const tag_format_t tag_table[] =
   {0, NULL}
 };
 
-struct classx
-{
-	std::string func_name;
-	std::ofstream os_;
-	Graph g;
-	classx()
-	{
-		os_.open("arcs");
-		os_ << "digraph G {" << std::endl;
-	}
-	~classx()
-	{
-		//os_ << "}" << std::endl;
-	}
-	void tag_function (const char *, unsigned, unsigned);
-	void tag_blocks (const char *, unsigned, unsigned);
-	void tag_arcs (const char *, unsigned, unsigned);
-	void tag_lines (const char *, unsigned, unsigned);
-	void tag_counters (const char *, unsigned, unsigned);
-	void tag_summary (const char *, unsigned, unsigned);
-	void process_graph()
-	{
-		if(num_vertices(g))
-		{
-			int npath = 0;
-			int npathpp = 0;
-			{
-				std::vector<Vertex> parents(boost::num_vertices(g));
-				std::vector<Vertex> complexity(boost::num_vertices(g));
-				depth_first_search(g, visitor(npath_counter(parents,complexity)));
-				npathpp = complexity[0];
-			}
-			{
-//				std::cout << num_vertices(g) << std::endl;
-				clear_vertex(num_vertices(g) - 1, g);
-				remove_vertex(num_vertices(g) - 1, g);
-//				std::cout << num_vertices(g) << std::endl;
-				std::vector<Vertex> parents(boost::num_vertices(g));
-				std::vector<Vertex> complexity(boost::num_vertices(g));
-				depth_first_search(g, visitor(npath_counter(parents,complexity)));
-				npath = complexity[0];
-
-				std::string filename = func_name + std::string(".dot");
-				std::ofstream os(filename.c_str());
-				write_graphviz(os, g);
-			}
-			std::cout
-				<< npath << " "
-				<< npathpp << " "
-				<< func_name << std::endl;
-		}
-	}
-};
-
 void
-classx::tag_function (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_function (const char *filename ATTRIBUTE_UNUSED,
 	      unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
   unsigned long pos = gcov_position ();
@@ -131,7 +96,7 @@ classx::tag_function (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-classx::tag_blocks (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_blocks (const char *filename ATTRIBUTE_UNUSED,
 	    unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
   unsigned n_blocks = GCOV_TAG_BLOCKS_NUM (length);
@@ -157,7 +122,7 @@ classx::tag_blocks (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-classx::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
 				  unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
 //	std::cout << "tag_arcs start" << std::endl;
@@ -193,7 +158,7 @@ classx::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-classx::tag_lines (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_lines (const char *filename ATTRIBUTE_UNUSED,
 				   unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
 	if (flag_dump_contents)
@@ -237,7 +202,7 @@ classx::tag_lines (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-classx::tag_counters (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_counters (const char *filename ATTRIBUTE_UNUSED,
 	      unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
 	//static const char *const counter_names[] = GCOV_COUNTER_NAMES;
@@ -267,7 +232,7 @@ classx::tag_counters (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-classx::tag_summary (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_summary (const char *filename ATTRIBUTE_UNUSED,
 	     unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
   struct gcov_summary summary;
@@ -289,9 +254,9 @@ classx::tag_summary (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-dump_file (const char *filename)
+gcov_reader::open(const char *filename)
 {
-	classx object;
+	//gcov_reader object;
 
 	unsigned tags[4];
 	unsigned depth = 0;
@@ -377,11 +342,11 @@ dump_file (const char *filename)
 		{
 			case GCOV_TAG_FUNCTION:
 				break;
-//   {GCOV_TAG_BLOCKS, "BLOCKS", classx::tag_blocks},
-//   {GCOV_TAG_ARCS, "ARCS", classx::tag_arcs},
-//   {GCOV_TAG_LINES, "LINES", classx::tag_lines},
-//   {GCOV_TAG_OBJECT_SUMMARY, "OBJECT_SUMMARY", classx::tag_summary},
-//   {GCOV_TAG_PROGRAM_SUMMARY, "PROGRAM_SUMMARY", classx::tag_summary},
+//   {GCOV_TAG_BLOCKS, "BLOCKS", gcov_reader::tag_blocks},
+//   {GCOV_TAG_ARCS, "ARCS", gcov_reader::tag_arcs},
+//   {GCOV_TAG_LINES, "LINES", gcov_reader::tag_lines},
+//   {GCOV_TAG_OBJECT_SUMMARY, "OBJECT_SUMMARY", gcov_reader::tag_summary},
+//   {GCOV_TAG_PROGRAM_SUMMARY, "PROGRAM_SUMMARY", gcov_reader::tag_summary},
 		}
 		if (tag)
 		{
@@ -402,28 +367,27 @@ dump_file (const char *filename)
 		switch(format->tag)
 		{
 			case GCOV_TAG_FUNCTION:
-				object.tag_function(filename, tag, length);
+				tag_function(filename, tag, length);
 				break;
 			case GCOV_TAG_BLOCKS:
-				object.tag_blocks(filename, tag, length);
+				tag_blocks(filename, tag, length);
 				break;
 			case GCOV_TAG_ARCS:
-				object.tag_arcs(filename, tag, length);
+				tag_arcs(filename, tag, length);
 				break;
 			case GCOV_TAG_LINES:
-				object.tag_lines(filename, tag, length);
+				tag_lines(filename, tag, length);
 				break;
 			case GCOV_TAG_OBJECT_SUMMARY:
-				object.tag_counters(filename, tag, length);
+				tag_counters(filename, tag, length);
 				break;
 			case GCOV_TAG_PROGRAM_SUMMARY:
-				object.tag_summary(filename, tag, length);
+				tag_summary(filename, tag, length);
 				break;
 			default:
 				format_proc = false;
 		}
 
-//		printf ("\n");
 		if (flag_dump_contents && format_proc)
 		{
 			unsigned long actual_length = gcov_position () - base;
@@ -444,6 +408,36 @@ dump_file (const char *filename)
 			break;
 		}
     }
-	object.process_graph();
+	process_graph();
 	gcov_close ();
+}
+
+void gcov_reader::process_graph()
+{
+	if(num_vertices(g))
+	{
+		int npath = 0;
+		int npathpp = 0;
+		{
+			std::vector<Vertex> parents(boost::num_vertices(g));
+			std::vector<Vertex> complexity(boost::num_vertices(g));
+			depth_first_search(g, boost::visitor(npath_counter(parents,complexity)));
+			npathpp = complexity[0];
+		}
+		{
+//				std::cout << num_vertices(g) << std::endl;
+			clear_vertex(num_vertices(g) - 1, g);
+			remove_vertex(num_vertices(g) - 1, g);
+//				std::cout << num_vertices(g) << std::endl;
+			std::vector<Vertex> parents(boost::num_vertices(g));
+			std::vector<Vertex> complexity(boost::num_vertices(g));
+			depth_first_search(g, boost::visitor(npath_counter(parents,complexity)));
+			npath = complexity[0];
+
+			std::string filename = func_name + std::string(".dot");
+			std::ofstream os(filename.c_str());
+			write_graphviz(os, g);
+		}
+		reporter_.on_function(func_name, npath, npathpp);
+	}
 }

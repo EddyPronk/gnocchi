@@ -1,0 +1,32 @@
+# SET(CMAKE_VERBOSE_MAKEFILE TRUE)
+
+ENABLE_TESTING()
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -Wall -Wextra -DIN_GCC")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage -Wall -Wextra")
+ADD_DEFINITIONS('-DBASEVER="4.1.2"' '-DDATESTAMP=""' '-DDEVPHASE=""')
+
+INCLUDE_DIRECTORIES(
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/gcc
+)
+
+ADD_LIBRARY(core
+  gcov_reader.cpp
+  errors.c
+)
+
+TARGET_LINK_LIBRARIES(core iberty)
+LINK_LIBRARIES(core)
+
+ADD_EXECUTABLE(gnocchi
+  main.cpp
+  gcov_reader.cpp
+  version.c
+  )
+
+ADD_LIBRARY(test_input test_input.c)
+
+ADD_EXECUTABLE(test_npath test_npath.cpp)
+
+ADD_TEST(test_npath test_npath)
+

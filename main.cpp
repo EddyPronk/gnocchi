@@ -26,6 +26,7 @@ extern "C"
 #include "system.h"
 #include "version.h"
 #include <getopt.h>
+
 }
 
 class report_printer : public reporter
@@ -62,7 +63,7 @@ main (int argc ATTRIBUTE_UNUSED, char **argv)
 	int opt;
 
 	/* Unlock the stdio streams.  */
-	unlock_std_streams ();
+	// FIXME unlock_std_streams ();
 
 	while ((opt = getopt_long (argc, argv, "hlpv", options, NULL)) != -1)
     {

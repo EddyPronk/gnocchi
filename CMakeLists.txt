@@ -1,4 +1,4 @@
-# SET(CMAKE_VERBOSE_MAKEFILE TRUE)
+SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 ENABLE_TESTING()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -Wall -Wextra -DIN_GCC")
@@ -15,7 +15,6 @@ ADD_LIBRARY(core
   errors.c
 )
 
-TARGET_LINK_LIBRARIES(core iberty)
 LINK_LIBRARIES(core)
 
 ADD_EXECUTABLE(gnocchi

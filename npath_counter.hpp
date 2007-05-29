@@ -26,26 +26,32 @@ public:
 		: parent(pp), complexity(qq), end_state(parent.size() - 1) {}
 
     template <class Edge, class Graph>
-    void tree_edge(Edge u, const Graph& g) {
-		parent[target(u, g)] = source(u, g);
+    void tree_edge(Edge e, const Graph& g)
+	{
+		if(parent[target(e, g)] == 0)
+			parent[target(e, g)] = source(e, g);
     }
     template <class Edge, class Graph>
-    void back_edge(Edge e, const Graph& g) {
-		complexity[source(e, g)] += 1;
+    void back_edge(Edge e, const Graph& g)
+	{
+		if(parent[target(e, g)] == 0)
+			parent[target(e, g)] = source(e, g);
+		complexity[source(e, g)] = 1;
+		complexity[target(e, g)] += 1;
     }
     template <class Edge, class Graph>
-    void forward_or_cross_edge(Edge e, const Graph& g) {
+    void forward_or_cross_edge(Edge e, const Graph& g)
+	{
 		complexity[source(e, g)] += complexity[target(e, g)];
     }
     template <class Vertex, class Graph>
-    void finish_vertex(Vertex u, const Graph&) {
-		if (u == end_state)
-			complexity[u] += 1;
+    void finish_vertex(Vertex u, const Graph&)
+	{
+		if(complexity[u] == 0)
+			complexity[u] = 1;
 
-		if(parent[u])
+		if(u != 0)
 			complexity[parent[u]] += complexity[u];
-		else
-			complexity[parent[u]] = complexity[u];
     }
 private:
 	std::vector<Vertex>& parent;

@@ -28,7 +28,6 @@ Boston, MA 02110-1301, USA.  */
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 
-typedef boost::adjacency_list<> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::vertices_size_type size_type;
 
@@ -148,7 +147,7 @@ gcov_reader::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
 			dst = gcov_read_unsigned ();
 			flags = gcov_read_unsigned ();
 			//printf (" %u:%04x", dst, flags);
-//			if((flags == 4) or (flags == 1))
+//			if(flags == 4)
 			{
 				//		std::cout << blockno << " -> " << dst << std::endl;
 				add_edge(blockno, dst, g);
@@ -414,30 +413,43 @@ gcov_reader::open(const char *filename)
 
 void gcov_reader::process_graph()
 {
+	params param;
 	if(num_vertices(g))
 	{
 		int npath = 0;
 		int npathpp = 0;
 		{
-			std::vector<Vertex> parents(boost::num_vertices(g));
-			std::vector<Vertex> complexity(boost::num_vertices(g));
-			depth_first_search(g, boost::visitor(npath_counter(parents,complexity)));
-			npathpp = complexity[0];
-		}
-		{
-//				std::cout << num_vertices(g) << std::endl;
-			clear_vertex(num_vertices(g) - 1, g);
-			remove_vertex(num_vertices(g) - 1, g);
-//				std::cout << num_vertices(g) << std::endl;
-			std::vector<Vertex> parents(boost::num_vertices(g));
-			std::vector<Vertex> complexity(boost::num_vertices(g));
-			depth_first_search(g, boost::visitor(npath_counter(parents,complexity)));
-			npath = complexity[0];
+ 			clear_vertex(0, g);
+ 			remove_vertex(0, g);
 
 			std::string filename = func_name + std::string(".dot");
 			std::ofstream os(filename.c_str());
 			write_graphviz(os, g);
+
+			std::vector<Parent> parents(boost::num_vertices(g));
+			std::vector<Vertex> complexity(boost::num_vertices(g));
+			int cyclomatic_complexity = 0;
+			depth_first_search(g, boost::visitor(npath_counter(parents, complexity, cyclomatic_complexity)));
+			param.npath_complexity_2 = complexity[0];
 		}
-		reporter_.on_function(func_name, npath, npathpp);
+		{
+			clear_vertex(num_vertices(g) - 1, g);
+			remove_vertex(num_vertices(g) - 1, g);
+  
+			std::vector<Parent> parents(boost::num_vertices(g));
+			std::vector<Vertex> complexity(boost::num_vertices(g));
+			
+			depth_first_search(g, boost::visitor(npath_counter(
+												  parents,
+												  complexity,
+												  param.cyclomatic_complexity
+												  )));
+			param.npath_complexity = complexity[0];
+
+			std::string filename = func_name + std::string(".simple.dot");
+			std::ofstream os(filename.c_str());
+			write_graphviz(os, g);
+		}
+		reporter_.on_function(func_name, param);
 	}
 }

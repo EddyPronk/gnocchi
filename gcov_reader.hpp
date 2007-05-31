@@ -24,13 +24,28 @@ Boston, MA 02110-1301, USA.  */
 #include <string>
 #include <boost/graph/adjacency_list.hpp>
 
+struct params
+{
+	params()
+		: cyclomatic_complexity(0)
+		, npath_complexity(0)
+		, npath_complexity_2(0)
+	{}
+	int cyclomatic_complexity;
+	int npath_complexity;
+	int npath_complexity_2;
+};
+
 class reporter
 {
 public:
 	virtual ~reporter() {}
-	virtual void on_function(const std::string& fn, int x, int y) = 0;
+	virtual void on_function(const std::string& fn, const params&) = 0;
 };
 
+using namespace boost;
+
+//typedef adjacency_list < vecS, vecS, undirectedS > Graph;
 typedef boost::adjacency_list<> Graph;
 
 struct gcov_reader

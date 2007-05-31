@@ -32,18 +32,17 @@ extern "C"
 class report_printer : public reporter
 {
 public:
-	virtual void on_function(const std::string& fn, int npath, int npathpp)
+	virtual void on_function(const std::string& fn, const params& param)
 	{
 		std::cout
-			<< npath << " "
-			<< npathpp << " "
+			<< param.cyclomatic_complexity << " "
+			<< param.npath_complexity << " "
+			//<< param.npath_complexity_2 << " "
 			<< fn << std::endl;
 
 	}
 };
 
-
-//static void print_prefix (const char *, unsigned, gcov_position_t);
 static void print_usage (void);
 static void print_version (void);
 extern int main (int, char **);

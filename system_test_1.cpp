@@ -22,72 +22,72 @@ Boston, MA 02110-1301, USA.  */
 
 struct fixture : public reporter
 {
-	struct test_data
+	void on_function(const std::string& fn, const params& param)
 	{
-		test_data(int np, int nppp, const std::string& s)
-			: npath(np)
-			, npathpp(nppp)
-			, function(s)
-		{
-		}
-		int npath;
-		int npathpp;
-		std::string function;
-	};
-	void on_function(const std::string& fn, int npath, int npathpp)
-	{
-		actual.insert(std::make_pair(fn, std::make_pair(npath,npathpp)));
+		actual_.insert(std::make_pair(fn, param));
 	}
-	void add_test(int npath, int npathpp, const::std::string& fn)
+	void add_test(int c, int npath, int npathpp, const::std::string& fn)
 	{
-		expected.insert(std::make_pair(fn, std::make_pair(npath,npathpp)));
+		params param;
+		param.cyclomatic_complexity = c;
+		param.npath_complexity = npath;
+		param.npath_complexity_2 = npathpp;
+		expected_.insert(std::make_pair(fn, param));
+	}
+	bool check(const std::string& name, int expected, int actual)
+	{
+		if(expected != actual)
+		{
+			std::cout << "FAIL : " << name << std::endl;
+			std::cout << "expected: " << expected << std::endl;
+			std::cout << "actual: " << actual << std::endl;
+		}
 	}
 	bool check()
 	{
 		bool error = false;
-		container::iterator pos(expected.begin());
-		container::iterator end(expected.end());
+		container::iterator pos(expected_.begin());
+		container::iterator end(expected_.end());
 		for(; pos != end; ++pos)
 		{
-			container::iterator found = actual.find(pos->first);
-			if(found == actual.end())
+			container::iterator actual = actual_.find(pos->first);
+			if(actual == actual_.end())
 			{
 				std::cout << "not found " << pos->first << std::endl;
 				error = true;
 			}
-			if(pos->second != found->second)
-			{
-				std::cout << "failed function \"" << pos->first << "\"" << std::endl;
-				std::cout << "expected " << pos->second.first << " " << pos->second.second << std::endl;
-				std::cout << "actual   " << found->second.first << " " << found->second.second << std::endl;
-				error = true;
-			}
+			check("cyclomatic_complexity", pos->second.cyclomatic_complexity, actual->second.cyclomatic_complexity);
+			check("npath_complexity", pos->second.npath_complexity, actual->second.npath_complexity);
+			check("npath_complexity_2", pos->second.npath_complexity_2, actual->second.npath_complexity_2);
 		}
 		return error;
 	}
-	typedef std::pair<int,int> value_type;
-	typedef std::map<std::string, value_type> container;
-	container actual;
-	container expected;
+	typedef std::map<std::string, params> container;
+	container actual_;
+	container expected_;
 };
 
 int main()
 {
 	fixture f;
-	f.add_test(1, 1, "action");
-	f.add_test(1, 1, "func_empty");
-	f.add_test(2, 2, "func_if_with_assignment");
-	f.add_test(2, 3, "func_if_with_function_call");
-	f.add_test(2, 2, "func_if_else");
-	f.add_test(4, 4, "func_if_else_2");
-	f.add_test(80, 80, "example_1");
-	f.add_test(16, 31, "example_2");
-	f.add_test(5, 5, "example_3");
-	f.add_test(4, 4, "example_4");
-	f.add_test(4, 4, "example_5");
+#if 1
+	f.add_test(0, 1, 1, "action");
+	f.add_test(0, 1, 1, "func_empty");
+	f.add_test(0, 2, 2, "func_if_with_assignment");
+	f.add_test(0, 2, 3, "func_if_with_function_call");
+	f.add_test(0, 2, 2, "func_if_else");
+	f.add_test(0, 4, 4, "func_if_else_2");
+	f.add_test(0, 80, 80, "example_1");
+	f.add_test(0, 16, 31, "example_2");
+	f.add_test(0, 5, 5, "example_3");
+	f.add_test(0, 4, 4, "example_4");
+	f.add_test(0, 4, 4, "example_5");
+#endif
+	f.add_test(0, 3, 3, "_Z4foo3i");
 
 	gcov_reader reader(f);
-	reader.open("/home/epronk/gnocchi/trunk/build/CMakeFiles/test_input.dir/test_input.gcno");
+	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
+	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
 
 	bool error = f.check();
 	return (error == true);

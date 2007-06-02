@@ -22,14 +22,7 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.  */
 
 #include "gcov_reader.hpp"
-#include <boost/graph/depth_first_search.hpp>
-#include <boost/graph/visitors.hpp>
-#include <boost/graph/graph_utility.hpp>
-#include <boost/graph/reverse_graph.hpp>
-#include <boost/graph/graphviz.hpp>
-
-typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-typedef boost::graph_traits<Graph>::vertices_size_type size_type;
+#include "analyser.hpp"
 
 extern "C"
 {
@@ -45,8 +38,6 @@ extern "C"
 
 }
 
-#include "npath_counter.hpp"
-
 typedef struct tag_format
 {
 	unsigned tag;
@@ -54,7 +45,6 @@ typedef struct tag_format
 } tag_format_t;
 
 static int flag_dump_contents = 1;
-//static int flag_dump_positions = 0;
 
 static const tag_format_t tag_table[] =
 {
@@ -83,10 +73,10 @@ gcov_reader::tag_function (const char *filename ATTRIBUTE_UNUSED,
     {
       const char *name;
 
-	  process_graph();
+	  analyser.process(func_name);
       name = gcov_read_string ();
 	  func_name = name;
-	  g.clear();
+	  analyser.clear();
 //      printf (", `%s'", name ? name : "NULL");
       name = gcov_read_string ();
       //printf (" %s", name ? name : "NULL");
@@ -150,7 +140,7 @@ gcov_reader::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
 //			if(flags == 4)
 			{
 				//		std::cout << blockno << " -> " << dst << std::endl;
-				add_edge(blockno, dst, g);
+				analyser.add_edge(blockno, dst);
 			}
 		}
     }
@@ -231,7 +221,7 @@ gcov_reader::tag_counters (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-gcov_reader::tag_summary (const char *filename ATTRIBUTE_UNUSED,
+gcov_reader::tag_summary (const char* filename ATTRIBUTE_UNUSED,
 	     unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
   struct gcov_summary summary;
@@ -407,49 +397,10 @@ gcov_reader::open(const char *filename)
 			break;
 		}
     }
-	process_graph();
+	analyser.process(func_name);
 	gcov_close ();
 }
 
 void gcov_reader::process_graph()
 {
-	params param;
-	if(num_vertices(g))
-	{
-		int npath = 0;
-		int npathpp = 0;
-		{
- 			clear_vertex(0, g);
- 			remove_vertex(0, g);
-
-			std::string filename = func_name + std::string(".dot");
-			std::ofstream os(filename.c_str());
-			write_graphviz(os, g);
-
-			std::vector<Parent> parents(boost::num_vertices(g));
-			std::vector<Vertex> complexity(boost::num_vertices(g));
-			int cyclomatic_complexity = 0;
-			depth_first_search(g, boost::visitor(npath_counter(parents, complexity, cyclomatic_complexity)));
-			param.npath_complexity_2 = complexity[0];
-		}
-		{
-			clear_vertex(num_vertices(g) - 1, g);
-			remove_vertex(num_vertices(g) - 1, g);
-  
-			std::vector<Parent> parents(boost::num_vertices(g));
-			std::vector<Vertex> complexity(boost::num_vertices(g));
-			
-			depth_first_search(g, boost::visitor(npath_counter(
-												  parents,
-												  complexity,
-												  param.cyclomatic_complexity
-												  )));
-			param.npath_complexity = complexity[0];
-
-			std::string filename = func_name + std::string(".simple.dot");
-			std::ofstream os(filename.c_str());
-			write_graphviz(os, g);
-		}
-		reporter_.on_function(func_name, param);
-	}
 }

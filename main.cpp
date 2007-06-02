@@ -18,6 +18,8 @@ Boston, MA 02110-1301, USA.  */
 
 #include <iostream>
 #include "gcov_reader.hpp"
+#include "analyser.hpp"
+#include "reporter.hpp"
 
 extern "C"
 {
@@ -32,7 +34,7 @@ extern "C"
 class report_printer : public reporter
 {
 public:
-	virtual void on_function(const std::string& fn, const params& param)
+	virtual void on_function(const std::string& fn, const FunctionData& param)
 	{
 		std::cout
 			<< param.cyclomatic_complexity << " "
@@ -86,7 +88,8 @@ main (int argc ATTRIBUTE_UNUSED, char **argv)
     }
 
 	report_printer r;
-	gcov_reader reader(r);
+	Analyser a(r);
+	gcov_reader reader(a);
 	while (argv[optind])
 		reader.open(argv[optind++]);
 	return 0;

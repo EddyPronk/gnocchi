@@ -19,20 +19,22 @@ Boston, MA 02110-1301, USA.  */
 #include <iostream>
 #include <map>
 #include "gcov_reader.hpp"
+#include "analyser.hpp"
+#include "reporter.hpp"
 
 struct fixture : public reporter
 {
-	void on_function(const std::string& fn, const params& param)
+	void on_function(const std::string& fn, const FunctionData& param)
 	{
 		actual_.insert(std::make_pair(fn, param));
 	}
 	void add_test(int c, int npath, int npathpp, const::std::string& fn)
 	{
-		params param;
-		param.cyclomatic_complexity = c;
-		param.npath_complexity = npath;
-		param.npath_complexity_2 = npathpp;
-		expected_.insert(std::make_pair(fn, param));
+		FunctionData data;
+		data.cyclomatic_complexity = c;
+		data.npath_complexity = npath;
+		data.npath_complexity_2 = npathpp;
+		expected_.insert(std::make_pair(fn, data));
 	}
 	bool check(const std::string& name, int expected, int actual)
 	{
@@ -62,7 +64,7 @@ struct fixture : public reporter
 		}
 		return error;
 	}
-	typedef std::map<std::string, params> container;
+	typedef std::map<std::string, FunctionData> container;
 	container actual_;
 	container expected_;
 };
@@ -85,7 +87,8 @@ int main()
 #endif
 	f.add_test(0, 3, 3, "_Z4foo3i");
 
-	gcov_reader reader(f);
+	Analyser a(f);
+	gcov_reader reader(a);
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
 

@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY(core
   gcov_reader.cpp
+  analyser.cpp
   errors.c
 )
 

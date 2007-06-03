@@ -1,4 +1,4 @@
-#include "version.h"
+#include "config.h"
 
 /* This is the trailing component of the string reported as the
    version number by all components of the compiler.  For an official

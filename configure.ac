@@ -16,4 +16,11 @@ AC_PROG_RANLIB
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
+AC_CONFIG_HEADER([auto-host.h:auto-host.h.in])
+
+AC_LANG_PUSH(C++)
+AC_CHECK_HEADERS([boost/graph/graph_utility.hpp], [],
+  [AC_MSG_ERROR([please install libboost-graph-dev])])
+AC_LANG_POP(C++)
+
 AC_OUTPUT

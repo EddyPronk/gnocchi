@@ -25,7 +25,7 @@ fi
 set -x
 rm -f config.cache aclocal.m4
 ${ACLOCAL:-aclocal}
-#${AUTOHEADER:-autoheader}
+${AUTOHEADER:-autoheader}
 ${LIBTOOLIZE:-libtoolize} --automake --copy --force
 ${AUTOMAKE:-automake} --add-missing --foreign
 ${AUTOCONF:-autoconf}

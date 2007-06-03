@@ -409,7 +409,7 @@ extern void *realloc (void *, size_t);
 #if !defined (HAVE_STRSIGNAL) \
     || (defined (HAVE_DECL_STRSIGNAL) && !HAVE_DECL_STRSIGNAL)
 # ifndef strsignal
-extern const char *strsignal (int);
+extern char *strsignal (int);
 # endif
 #endif
 

@@ -2,9 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(gnocci, 1.1, janneke@gnu.org)
+AC_INIT(gnocchi, 1.1, epronk@muftor.com)
 AM_INIT_AUTOMAKE
-#AC_CONFIG_SRCDIR([bar/boos.cc])
 AC_CONFIG_FILES([Makefile])
 
 CFLAGS=${CFLAGS-"-Wall -Wextra -fprofile-arcs -ftest-coverage -DIN_GCC"}

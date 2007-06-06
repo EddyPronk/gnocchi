@@ -21,6 +21,8 @@ AC_CONFIG_HEADER([auto-host.h:auto-host.h.in])
 AC_LANG_PUSH(C++)
 AC_CHECK_HEADERS([boost/graph/graph_utility.hpp], [],
   [AC_MSG_ERROR([please install libboost-graph-dev])])
+AC_CHECK_HEADERS([boost/filesystem/path.hpp], [],
+  [AC_MSG_ERROR([please install libboost-filesystem-dev])])
 AC_LANG_POP(C++)
 
 AC_OUTPUT

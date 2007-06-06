@@ -80,7 +80,6 @@ public:
 		++vertices;
 		if(u == 0)
 		{
-			std::cout << "done" << std::endl;
 			cabe = edges - vertices + 2;
 		}
 		if(complexity[u] == 0)

@@ -21,6 +21,7 @@ Boston, MA 02110-1301, USA.  */
 
 #include <boost/graph/adjacency_list.hpp>
 #include "reporter.hpp"
+#include "function_data.hpp"
 
 typedef boost::adjacency_list<> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
@@ -33,13 +34,17 @@ public:
 		: reporter_(r)
 	{
 	}
-	void process(const std::string&);
+	void process(FunctionData::ptr data);
 	void clear();
 	void add_edge(int src, int dest);
+	void calculate_npath();
+	void calculate_npath_2();
+	void report();
 private:
 	reporter& reporter_;	
 	Graph graph_;
-	FunctionData data_;
+	FunctionData::ptr data_;
+	std::multimap<int, FunctionData::ptr> functions;
 };
 
 #endif

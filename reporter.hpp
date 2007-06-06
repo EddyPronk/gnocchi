@@ -19,23 +19,13 @@ Boston, MA 02110-1301, USA.  */
 #ifndef REPORTER_HPP_
 #define REPORTER_HPP_
 
-struct FunctionData
-{
-	FunctionData()
-		: cyclomatic_complexity(0)
-		, npath_complexity(0)
-		, npath_complexity_2(0)
-	{}
-	int cyclomatic_complexity;
-	int npath_complexity;
-	int npath_complexity_2;
-};
+#include "function_data.hpp"
 
 class reporter
 {
 public:
 	virtual ~reporter() {}
-	virtual void on_function(const std::string& fn, const FunctionData&) = 0;
+	virtual void on_function(FunctionData::ptr) = 0;
 };
 
 #endif

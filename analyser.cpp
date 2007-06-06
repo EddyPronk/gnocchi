@@ -42,44 +42,65 @@ void Analyser::clear()
 	graph_.clear();
 }
 
-void Analyser::process(const string& func_name)
+void Analyser::calculate_npath_2()
 {
+	clear_vertex(0, graph_);
+	remove_vertex(0, graph_);
+
+// 	string filename = func_name + string(".dot");
+// 	ofstream os(filename.c_str());
+// 	write_graphviz(os, graph_);
+
+	vector<Parent> parents(num_vertices(graph_));
+	vector<Vertex> complexity(num_vertices(graph_));
+	int cyclomatic_complexity = 0;
+	depth_first_search(graph_, visitor(npath_counter(parents, complexity, cyclomatic_complexity)));
+	data_->npath_complexity_2 = complexity[0];
+}
+
+void Analyser::calculate_npath()
+{
+	if(num_vertices(graph_) > 2)
+	{
+		clear_vertex(num_vertices(graph_) - 1, graph_);
+		remove_vertex(num_vertices(graph_) - 1, graph_);
+	}
+  
+	vector<Parent> parents(num_vertices(graph_));
+	vector<Vertex> complexity(num_vertices(graph_));
+			
+	depth_first_search(graph_, visitor(npath_counter(
+										   parents,
+										   complexity,
+										   data_->cyclomatic_complexity
+										   )));
+	data_->npath_complexity = complexity[0];
+
+// 	string filename = func_name + string(".simple.dot");
+// 	ofstream os(filename.c_str());
+// 	write_graphviz(os, graph_);
+}
+
+void Analyser::process(FunctionData::ptr data)
+{
+	data_ = data;
+
 	if(num_vertices(graph_))
 	{
-		int npath = 0;
-		int npathpp = 0;
-		{
-			clear_vertex(0, graph_);
-			remove_vertex(0, graph_);
-
-			string filename = func_name + string(".dot");
-			ofstream os(filename.c_str());
-			write_graphviz(os, graph_);
-
-			vector<Parent> parents(num_vertices(graph_));
-			vector<Vertex> complexity(num_vertices(graph_));
-			int cyclomatic_complexity = 0;
-			depth_first_search(graph_, visitor(npath_counter(parents, complexity, cyclomatic_complexity)));
-			data_.npath_complexity_2 = complexity[0];
-		}
-		{
-			clear_vertex(num_vertices(graph_) - 1, graph_);
-			remove_vertex(num_vertices(graph_) - 1, graph_);
-  
-			vector<Parent> parents(num_vertices(graph_));
-			vector<Vertex> complexity(num_vertices(graph_));
-			
-			depth_first_search(graph_, visitor(npath_counter(
-													 parents,
-													 complexity,
-													 data_.cyclomatic_complexity
-													 )));
-			data_.npath_complexity = complexity[0];
-
-			string filename = func_name + string(".simple.dot");
-			ofstream os(filename.c_str());
-			write_graphviz(os, graph_);
-		}
-		reporter_.on_function(func_name, data_);
+		calculate_npath_2();
+		calculate_npath();
+		functions.insert(std::make_pair(data_->npath_complexity, data_));
 	}
+}
+
+void Analyser::report()
+{
+	std::map<int, FunctionData::ptr>::iterator pos = functions.begin();
+	std::map<int, FunctionData::ptr>::iterator end = functions.end();
+
+	for(; pos != end; ++pos)
+	{
+		reporter_.on_function(pos->second);
+	}
+	
 }

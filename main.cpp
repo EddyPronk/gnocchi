@@ -21,6 +21,12 @@ Boston, MA 02110-1301, USA.  */
 #include "analyser.hpp"
 #include "reporter.hpp"
 
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/convenience.hpp"
+
+namespace fs = boost::filesystem;
+
 extern "C"
 {
 
@@ -34,14 +40,20 @@ extern "C"
 class report_printer : public reporter
 {
 public:
-	virtual void on_function(const std::string& fn, const FunctionData& param)
+	virtual void on_function(FunctionData::ptr param)
 	{
-		std::cout
-			<< param.cyclomatic_complexity << " "
-			<< param.npath_complexity << " "
-			//<< param.npath_complexity_2 << " "
-			<< fn << std::endl;
-
+#if 1
+		//if (param->npath_complexity > 4)
+		{
+			std::cout
+				<< param->filename << ":"
+				<< param->line_number << ": mccabe="
+				<< param->cyclomatic_complexity << " npath="
+				<< param->npath_complexity << " "
+				<< std::endl;
+				//<< param.npath_complexity_2 << " "
+		}
+#endif
 	}
 };
 
@@ -57,6 +69,46 @@ static const struct option options[] =
   { "positions",	    no_argument,       NULL, 'o' },
   { 0, 0, 0, 0 }
 };
+
+typedef std::vector<fs::path> filelist_t;
+filelist_t list;
+
+void find_file( const fs::path& dir_path)
+{
+	if ( !fs::exists( dir_path ) )
+	{
+		std::cout << "doesn't exist " << dir_path.native_directory_string() << std::endl;
+	}
+
+	if ( fs::is_directory( dir_path ))
+	{
+
+		fs::directory_iterator end_itr;
+		for(fs::directory_iterator itr( dir_path );
+			itr != end_itr;
+			++itr )
+		{
+			if ( fs::is_directory( *itr ) )
+			{
+				find_file(*itr);
+			}
+			else
+			{
+         	
+				//if (itr->leaf().rfind(".o") != std::string::npos)
+				if (fs::extension(*itr) == ".gcno")
+				{
+					std::cout << itr->normalize().string() << std::endl;
+					list.push_back(itr->normalize());
+				}
+			}
+		}
+	}
+	else
+	{
+		list.push_back(dir_path);
+	}
+}
 
 int
 main (int argc ATTRIBUTE_UNUSED, char **argv)
@@ -90,8 +142,17 @@ main (int argc ATTRIBUTE_UNUSED, char **argv)
 	report_printer r;
 	Analyser a(r);
 	gcov_reader reader(a);
-	while (argv[optind])
-		reader.open(argv[optind++]);
+	find_file(".");
+
+	for(filelist_t::iterator pos = list.begin(); pos != list.end(); ++pos)
+	{
+//		std::cout << pos->string() << std::endl;
+		reader.open(pos->string().c_str());
+	}
+
+	a.report();
+//  	while (argv[optind])
+//  		reader.open(argv[optind++]);
 	return 0;
 }
 

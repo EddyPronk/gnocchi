@@ -23,6 +23,13 @@ Boston, MA 02110-1301, USA.  */
 
 #include "gcov_reader.hpp"
 #include "analyser.hpp"
+#include <iostream>
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/convenience.hpp"
+
+namespace fs = boost::filesystem;
 
 extern "C"
 {
@@ -73,13 +80,13 @@ gcov_reader::tag_function (const char *filename ATTRIBUTE_UNUSED,
     {
       const char *name;
 
-	  analyser.process(func_name);
+	  analyser.process(data_);
       name = gcov_read_string ();
-	  func_name = name;
+	  data_ = FunctionData::ptr(new FunctionData);
+	  data_->name = name;
+	  data_->line_number = 0; // hacky
 	  analyser.clear();
-//      printf (", `%s'", name ? name : "NULL");
       name = gcov_read_string ();
-      //printf (" %s", name ? name : "NULL");
       gcov_read_unsigned();
     }
 }
@@ -150,41 +157,44 @@ void
 gcov_reader::tag_lines (const char *filename ATTRIBUTE_UNUSED,
 				   unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
 {
+//	std::cout << "tag_lines" << std::endl;
 	if (flag_dump_contents)
     {
 		/* unsigned blockno = */ gcov_read_unsigned ();
-		char const *sep = NULL;
+//		int first_line = 0;
 
 		while (1)
 		{
 			/* gcov_position_t position = */ gcov_position ();
 			const char *source = NULL;
 			unsigned lineno = gcov_read_unsigned ();
+			//std::cout << lineno << std::endl;
 
 			if (!lineno)
 			{
 				source = gcov_read_string ();
 				if (!source)
 					break;
-				sep = NULL;
+				data_->filename = fs::path(std::string(source), fs::native).normalize().string();
+			}
+			else
+			{
+ 				if(!data_->line_number)
+ 				{
+ 					data_->line_number = lineno;
+					//std::cout << "first_line " << first_line << std::endl;
+ 				}
 			}
 
-			if (!sep)
-			{
-				//      printf ("\n");
-				//print_prefix (filename, 0, position);
-				//printf ("\tblock %u:", blockno);
-				sep = "";
-			}
 			if (lineno)
 			{
+//				std::cout << lineno << std::endl;
 //	      printf ("%s%u", sep, lineno);
-				sep = ", ";
 			}
 			else
 			{
 //	      printf ("%s`%s'", sep, source);
-				sep = ":";
+//				std::cout << source << std::endl;
 			}
 		}
     }
@@ -327,16 +337,6 @@ gcov_reader::open(const char *filename)
 				goto found;
 		format = &tag_table[GCOV_TAG_IS_COUNTER (tag) ? 2 : 1];
 	  found:;
-		switch(format->tag)
-		{
-			case GCOV_TAG_FUNCTION:
-				break;
-//   {GCOV_TAG_BLOCKS, "BLOCKS", gcov_reader::tag_blocks},
-//   {GCOV_TAG_ARCS, "ARCS", gcov_reader::tag_arcs},
-//   {GCOV_TAG_LINES, "LINES", gcov_reader::tag_lines},
-//   {GCOV_TAG_OBJECT_SUMMARY, "OBJECT_SUMMARY", gcov_reader::tag_summary},
-//   {GCOV_TAG_PROGRAM_SUMMARY, "PROGRAM_SUMMARY", gcov_reader::tag_summary},
-		}
 		if (tag)
 		{
 			if (depth && depth < tag_depth)
@@ -397,10 +397,6 @@ gcov_reader::open(const char *filename)
 			break;
 		}
     }
-	analyser.process(func_name);
+	analyser.process(data_);
 	gcov_close ();
-}
-
-void gcov_reader::process_graph()
-{
 }

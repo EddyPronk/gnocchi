@@ -24,16 +24,17 @@ Boston, MA 02110-1301, USA.  */
 
 struct fixture : public reporter
 {
-	void on_function(const std::string& fn, const FunctionData& param)
+	void on_function(FunctionData::ptr param)
 	{
-		actual_.insert(std::make_pair(fn, param));
+		std::cout << "on_function " << param->name << std::endl;
+		actual_.insert(std::make_pair(param->name, param));
 	}
 	void add_test(int c, int npath, int npathpp, const::std::string& fn)
 	{
-		FunctionData data;
-		data.cyclomatic_complexity = c;
-		data.npath_complexity = npath;
-		data.npath_complexity_2 = npathpp;
+		FunctionData::ptr data(new FunctionData);
+		data->cyclomatic_complexity = c;
+		data->npath_complexity = npath;
+		data->npath_complexity_2 = npathpp;
 		expected_.insert(std::make_pair(fn, data));
 	}
 	bool check(const std::string& name, int expected, int actual)
@@ -44,6 +45,7 @@ struct fixture : public reporter
 			std::cout << "expected: " << expected << std::endl;
 			std::cout << "actual: " << actual << std::endl;
 		}
+		return false;
 	}
 	bool check()
 	{
@@ -58,13 +60,16 @@ struct fixture : public reporter
 				std::cout << "not found " << pos->first << std::endl;
 				error = true;
 			}
-			check("cyclomatic_complexity", pos->second.cyclomatic_complexity, actual->second.cyclomatic_complexity);
-			check("npath_complexity", pos->second.npath_complexity, actual->second.npath_complexity);
-			check("npath_complexity_2", pos->second.npath_complexity_2, actual->second.npath_complexity_2);
+			else
+			{
+				check("cyclomatic_complexity", pos->second->cyclomatic_complexity, actual->second->cyclomatic_complexity);
+				check("npath_complexity", pos->second->npath_complexity, actual->second->npath_complexity);
+				check("npath_complexity_2", pos->second->npath_complexity_2, actual->second->npath_complexity_2);
+			}
 		}
 		return error;
 	}
-	typedef std::map<std::string, FunctionData> container;
+	typedef std::map<std::string, FunctionData::ptr> container;
 	container actual_;
 	container expected_;
 };
@@ -92,6 +97,7 @@ int main()
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
 
+	a.report();
 	bool error = f.check();
 	return (error == true);
 }

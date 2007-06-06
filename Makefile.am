@@ -8,4 +8,4 @@ LDADD =
 bin_PROGRAMS =
 bin_PROGRAMS += gnocchi
 gnocchi_SOURCES = analyser.cpp  gcov_reader.cpp  main.cpp errors.c version.c
-
+gnocchi_LDADD = -lboost_filesystem

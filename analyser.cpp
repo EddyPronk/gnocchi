@@ -100,7 +100,8 @@ void Analyser::report()
 
 	for(; pos != end; ++pos)
 	{
-		reporter_.on_function(pos->second);
+		if(pos->second->npath_complexity > 4)
+			reporter_.on_function(pos->second);
 	}
 	
 }

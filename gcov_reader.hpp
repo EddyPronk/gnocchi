@@ -26,6 +26,7 @@ Boston, MA 02110-1301, USA.  */
 
 #include <string>
 #include "function_data.hpp"
+#include <boost/filesystem/path.hpp>
 
 class Analyser;
 
@@ -37,7 +38,7 @@ struct gcov_reader
 		: analyser(a)
 	{
 	}
-	void open(const char* filename);
+	void open(const boost::filesystem::path& filename);
 	void tag_function (const char*, unsigned, unsigned);
 	void tag_blocks (const char*, unsigned, unsigned);
 	void tag_arcs (const char*, unsigned, unsigned);

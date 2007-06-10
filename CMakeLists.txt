@@ -27,6 +27,7 @@ ADD_EXECUTABLE(gnocchi
   )
 
 TARGET_LINK_LIBRARIES(core boost_filesystem)
+TARGET_LINK_LIBRARIES(gnocchi boost_program_options)
 ADD_LIBRARY(test_input test_input.c)
 ADD_LIBRARY(test_input_2 test_input_2.cpp
   before.cpp

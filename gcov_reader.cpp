@@ -25,10 +25,6 @@ Boston, MA 02110-1301, USA.  */
 #include "analyser.hpp"
 #include <iostream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/convenience.hpp"
-
 namespace fs = boost::filesystem;
 
 extern "C"
@@ -252,10 +248,9 @@ gcov_reader::tag_summary (const char* filename ATTRIBUTE_UNUSED,
     }
 }
 
-void
-gcov_reader::open(const char *filename)
+void gcov_reader::open(const boost::filesystem::path& path)
 {
-	//gcov_reader object;
+	const char* filename(path.string().c_str());
 
 	unsigned tags[4];
 	unsigned depth = 0;

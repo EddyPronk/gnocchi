@@ -57,15 +57,6 @@ public:
 };
 
 static void print_version (void);
-extern int main (int, char **);
-
-// A helper function to simplify the main part.
-template<class T>
-ostream& operator<<(ostream& os, const vector<T>& v)
-{
-	copy(v.begin(), v.end(), ostream_iterator<T>(cout, " ")); 
-	return os;
-}
 
 class file_processor
 {
@@ -138,16 +129,20 @@ public:
 int main(int ac, char* av[])
 {
 	// FIXME unlock_std_streams ();
-	//fs::path::default_name_check( fs::native );
 
 	try
 	{
-		// Declare a group of options that will be 
-		// allowed only on command line
 		po::options_description generic("Generic options");
+		int threshold(0);
+
 		generic.add_options()
 			("version,v", "print version string")
 			("help,h", "produce help message");
+
+		po::options_description config("Configuration");
+		config.add_options()
+			("threshold,t", po::value<int>(&threshold)->default_value(200), 
+			 "npath threshold");
 
 		po::options_description hidden("Hidden options");
 
@@ -157,16 +152,16 @@ int main(int ac, char* av[])
 		p.add("input-file", -1);
 
 		po::options_description cmdline_options;
-		cmdline_options.add(generic).add(hidden); // .add(config).add(hidden);
+		cmdline_options.add(generic).add(config).add(hidden);
 
 		po::options_description visible("Allowed options");
-		visible.add(generic); // .add(config)
-
+		visible.add(generic).add(config);
 
 		po::variables_map options;
-
 		store(po::command_line_parser(ac, av).
 			  options(cmdline_options).positional(p).run(), options);
+		notify(options);
+
 		if (options.count("help")) {
 			cout << visible << "\n";
 			return 0;
@@ -194,7 +189,9 @@ int main(int ac, char* av[])
 		processor.invoke(boost::bind(&gcov_reader::open, &reader, _1));
 		//processor.invoke(boost::bind(&foo::open, &bar, _1));
 
-		a.report();
+		a.report(threshold);
+		cout << threshold << "\n";
+
 	}
 	catch(exception& e)
 	{

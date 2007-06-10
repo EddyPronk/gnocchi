@@ -93,14 +93,14 @@ void Analyser::process(FunctionData::ptr data)
 	}
 }
 
-void Analyser::report()
+void Analyser::report(int npath_threshold)
 {
 	std::map<int, FunctionData::ptr>::iterator pos = functions.begin();
 	std::map<int, FunctionData::ptr>::iterator end = functions.end();
 
 	for(; pos != end; ++pos)
 	{
-		if(pos->second->npath_complexity > 4)
+		if(pos->second->npath_complexity > npath_threshold)
 			reporter_.on_function(pos->second);
 	}
 	

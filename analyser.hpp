@@ -39,7 +39,7 @@ public:
 	void add_edge(int src, int dest);
 	void calculate_npath();
 	void calculate_npath_2();
-	void report();
+	void report(int /*npath_threshold*/);
 private:
 	reporter& reporter_;	
 	Graph graph_;

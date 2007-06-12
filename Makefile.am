@@ -2,10 +2,37 @@
 # Process this file with automake to produce Makefile.in.                      
 
 SUBDIRS = 
-EXTRA_DIST = autogen.sh CMakeLists.txt
+EXTRA_DIST = \
+	COPYING \
+	README \
+	autogen.sh \
+	gcov-io.c \
+	CMakeLists.txt
+
 AM_CPPFLAGS = 
 LDADD = 
 bin_PROGRAMS =
 bin_PROGRAMS += gnocchi
-gnocchi_SOURCES = analyser.cpp  gcov_reader.cpp  main.cpp errors.c version.c
+gnocchi_SOURCES = \
+	analyser.cpp \
+	gcov_reader.cpp \
+	main.cpp \
+	errors.c \
+	version.c \
+	config.h \
+	auto-host.h.in \
+	errors.h \
+	filenames.h \
+	gcov-io.h \
+	gcov-iov.h \
+	hwint.h \
+	safe-ctype.h \
+	system.h \
+	version.h \
+	analyser.hpp \
+	function_data.hpp \
+	gcov_reader.hpp \
+	npath_counter.hpp \
+	reporter.hpp
+
 gnocchi_LDADD = -lboost_filesystem -lboost_program_options

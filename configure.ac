@@ -2,11 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(gnocchi, 0.21, epronk@muftor.com)
+AC_INIT(gnocchi, 0.22, epronk@muftor.com)
 AM_INIT_AUTOMAKE
 AC_CONFIG_FILES([Makefile])
 
-CFLAGS=${CFLAGS-"-Wall -Wextra -fprofile-arcs -ftest-coverage -DIN_GCC"}
+CFLAGS=${CFLAGS-"-Wall -Wextra -DIN_GCC"}
 CXXFLAGS="$CXXFLAGS $CFLAGS"
 
 AC_CANONICAL_HOST

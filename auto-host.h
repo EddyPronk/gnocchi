@@ -1,6 +1,9 @@
 /* auto-host.h.  Generated from auto-host.h.in by configure.  */
 /* auto-host.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <boost/filesystem/path.hpp> header file. */
+#define HAVE_BOOST_FILESYSTEM_PATH_HPP 1
+
 /* Define to 1 if you have the <boost/graph/graph_utility.hpp> header file. */
 #define HAVE_BOOST_GRAPH_GRAPH_UTILITY_HPP 1
 
@@ -44,16 +47,16 @@
 #define PACKAGE_NAME "gnocchi"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "gnocchi 1.1"
+#define PACKAGE_STRING "gnocchi 0.22"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnocchi"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.1"
+#define PACKAGE_VERSION "0.22"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.1"
+#define VERSION "0.22"

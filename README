@@ -1,0 +1,89 @@
+GNOCCHI - A COMPLEXITY ANALYSER FOR C++
+
+Gnocchi calculates cyclomatic and the NPATH complexity measures.
+
+It reads the coverage information produced by GCC and determines the
+complexity of all functions. If code is compiled with -fprofile-arcs
+or -ftest-coverage (depending on compiler version) GCC creates a .gcno
+file for every object file. 
+
+Gnocchi is free software.
+See the end of the file for license conditions.
+
+
+EXAMPLE SESSION
+
+Running gnocchi on its own build tree 
+./gnocchi --threshold 20 ~/gnocchi/trunk/
+/usr/include/c++/4.1.2/bits/basic_string.tcc:137: mccabe=7 npath=42 
+/home/epronk/gnocchi/trunk/test_input.c:101: mccabe=9 npath=80 
+/home/epronk/gnocchi/trunk/main.cpp:129: mccabe=11 npath=512 
+/home/epronk/gnocchi/trunk/gcov_reader.cpp:251: mccabe=29 npath=20194 
+/home/epronk/gnocchi/trunk/gcov_reader.cpp:251: mccabe=29 npath=20194 
+
+This is compiler style output pointing out which functions have a high
+complexity. By default it outputs all functions with a NPATH
+complexity higher than 200.
+
+
+GETTING GNOCCHI
+
+Get a release from:
+
+	http://sourceforge.net/project/showfiles.php?group_id=197216
+
+or get the latest sources from
+
+   svn co https://gnocchi.svn.sourceforge.net/svnroot/gnocchi gnocchi
+
+
+RUNNING GNOCCHI
+
+	./autogen.sh (ju
+	./configure
+	make
+
+	gcc -fprofile-arcs -ftest-coverage -c test_input.c 
+	./gnocchi --threshold 4 test_input.gcno 
+
+	outputs:
+	test_input.c:118: mccabe=5 npath=5 
+	test_input.c:89: mccabe=5 npath=16 
+	test_input.c:67: mccabe=9 npath=80 
+
+
+ACKNOWLEDGEMENTS
+		
+I wrote Gnocchi after seeing a demo of Complexian for Java. [4]
+Thanks to Marty Andrews for his presentation about complexity at MXPEG.
+		
+
+REFERENCES
+
+[1] T.J. McCabe, "A complexity measure," IEEE Trans.
+	Software Eng. vol. SE2, no 4, pp 308-320, 1976
+[2] B.A. Nejmeh, "NPATH: a measure of execution path complexity and its applications,"
+	Commun, ACM, vol 31, no 2, pp 188-200, 1988.
+[3] http://en.wikipedia.org/wiki/Cyclomatic_complexity
+[4] Complexity Analyser for Java,
+	http://www.martyandrews.net/resources/complexian.html
+	http://www.cogentconsulting.com.au/products/index.html
+
+
+Any feedback can be sent to Eddy Pronk <epronk@muftor.com>
+---
+
+Gnocchi is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+Gnocchi is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs; see the file COPYING.  If not, write to the
+Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA 02110-1301, USA.

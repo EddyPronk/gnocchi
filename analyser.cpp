@@ -26,7 +26,6 @@ Boston, MA 02110-1301, USA.  */
 #include <boost/graph/graphviz.hpp>
 
 #include "npath_counter.hpp"
-
 #include "reporter.hpp"
 
 using namespace boost;
@@ -103,5 +102,4 @@ void Analyser::report(int npath_threshold)
 		if(pos->second->npath_complexity > npath_threshold)
 			reporter_.on_function(pos->second);
 	}
-	
 }

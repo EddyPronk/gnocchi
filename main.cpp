@@ -169,7 +169,6 @@ int main(int ac, char* av[])
 
 		if (options.count("version"))
 		{
-			//cout << version();
 			print_version();
 			return 0;
 		}
@@ -184,14 +183,9 @@ int main(int ac, char* av[])
 			processor.process(options["input-file"].as< vector<string> >());
 		}
 
-		//foo bar;
-		//processor.invoke(boost::bind(&gcov_reader::open, &reader));
 		processor.invoke(boost::bind(&gcov_reader::open, &reader, _1));
-		//processor.invoke(boost::bind(&foo::open, &bar, _1));
 
 		a.report(threshold);
-		cout << threshold << "\n";
-
 	}
 	catch(exception& e)
 	{
@@ -201,23 +195,8 @@ int main(int ac, char* av[])
 	return 0;
 }
 
-#if 0
-	find_file(".");
-
-	for(filelist_t::iterator pos = list.begin(); pos != list.end(); ++pos)
-	{
-//		cout << pos->string() << endl;
-		reader.open(pos->string().c_str());
-	}
-
-//  	while (argv[optind])
-//  		reader.open(argv[optind++]);
-	return 0;
-}
-#endif
-
-	static void
-	print_version (void)
+static void
+print_version (void)
 {
 	printf ("gnocchi %s\n", version_string);
 	printf ("Copyright (C) 2007 Eddy Pronk.\n");

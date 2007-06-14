@@ -171,7 +171,7 @@ gcov_reader::tag_lines (const char *filename ATTRIBUTE_UNUSED,
 				source = gcov_read_string ();
 				if (!source)
 					break;
-				data_->filename = fs::path(std::string(source), fs::native).normalize().string();
+				data_->filename = fs::path(std::string(source), fs::native).string();
 			}
 			else
 			{

@@ -86,12 +86,9 @@ public:
 				}
 				else
 				{
-         	
-					//if (itr->leaf().rfind(".o") != string::npos)
 					if (fs::extension(*itr) == ".gcno")
 					{
-						cout << itr->normalize().string() << endl;
-						filelist.push_back(itr->normalize());
+						filelist.push_back(*itr);
 					}
 				}
 			}

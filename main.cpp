@@ -72,30 +72,37 @@ public:
 			return;
 		}
 
-		if ( fs::is_directory( dir_path ))
+		try
 		{
-
-			fs::directory_iterator end_itr;
-			for(fs::directory_iterator itr( dir_path );
-				itr != end_itr;
-				++itr )
+			if ( fs::is_directory( dir_path ))
 			{
-				if ( fs::is_directory( *itr ) )
+
+				fs::directory_iterator end_itr;
+				for(fs::directory_iterator itr( dir_path );
+					itr != end_itr;
+					++itr )
 				{
-					find_file(*itr);
-				}
-				else
-				{
-					if (fs::extension(*itr) == ".gcno")
+					if ( fs::is_directory( *itr ) )
 					{
-						filelist.push_back(*itr);
+						find_file(*itr);
+					}
+					else
+					{
+						if (fs::extension(*itr) == ".gcno")
+						{
+							filelist.push_back(*itr);
+						}
 					}
 				}
 			}
+			else
+			{
+				filelist.push_back(dir_path);
+			}
 		}
-		else
+		catch(const std::exception& e)
 		{
-			filelist.push_back(dir_path);
+			cout << "FIXME " << e.what() << endl;
 		}
 	}
 	void process_file(const fs::path& path)

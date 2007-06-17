@@ -65,7 +65,6 @@ public:
 	{
 		complexity[source(e, g)] = 1;
 		parent[target(e, g)].set(source(e, g));
-		complexity[target(e, g)] += 1;
 		++edges;
     }
     template <class Edge, class Graph>

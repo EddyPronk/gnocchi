@@ -42,27 +42,45 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace std;
 
-class report_printer : public reporter
+class report_printer
 {
 public:
-	virtual void on_function(FunctionData::ptr param)
-	{
-		cout
-			<< param->filename << ":"
-			<< param->line_number << ": mccabe="
-			<< param->cyclomatic_complexity << " npath="
-			<< param->npath_complexity << " "
-			<< endl;
-	}
 };
 
 static void print_version (void);
 
-class file_processor
+class file_processor : public reporter
 {
-
 	typedef vector<fs::path> filelist_t;
+	typedef map<fs::path, fs::path> filemap_t;
+
+	virtual void on_function(FunctionData::ptr param)
+	{
+		filemap_t::iterator found = map.find(param->filename);
+
+		if (found != map.end())
+		{
+			cout
+				<< found->second.string() << ":"
+				<< param->line_number << ": mccabe="
+				<< param->cyclomatic_complexity << " npath="
+				<< param->npath_complexity << " "
+				<< endl;
+		}
+		else
+		{
+			cout
+				<< param->filename << ":"
+				<< param->line_number << ": mccabe="
+				<< param->cyclomatic_complexity << " npath="
+				<< param->npath_complexity << " "
+				<< endl;
+		}
+	}
+
+	
 	filelist_t filelist;
+	filemap_t map;
 public:
 	void find_file( const fs::path& dir_path)
 	{
@@ -82,6 +100,16 @@ public:
 					itr != end_itr;
 					++itr )
 				{
+//					std::cout << itr->string() << " " << itr->leaf() << std::endl;
+					try
+					{
+						map[itr->leaf()] = *itr;
+					}
+					catch(const std::exception& e)
+					{
+						cout << "FIXME " << e.what() << endl;
+					}
+
 					if ( fs::is_directory( *itr ) )
 					{
 						find_file(*itr);
@@ -177,10 +205,10 @@ int main(int ac, char* av[])
 			return 0;
 		}
 
-		report_printer r;
-		Analyser a(r);
-		gcov_reader reader(a);
+		//report_printer r;
 		file_processor processor;
+		Analyser a(processor);
+		gcov_reader reader(a);
 
 		if (options.count("input-file"))
 		{

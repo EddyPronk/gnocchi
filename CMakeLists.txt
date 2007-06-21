@@ -35,8 +35,11 @@ ADD_LIBRARY(test_input_2 test_input_2.cpp
 )
 
 ADD_EXECUTABLE(system_test_1 system_test_1.cpp)
+ADD_TEST(system_test_1 system_test_1)
+
 ADD_EXECUTABLE(test_mccabe test_mccabe.cpp)
 TARGET_LINK_LIBRARIES(test_mccabe bgl-viz)
 
-ADD_TEST(system_test_1 system_test_1)
+ADD_EXECUTABLE(test_npath_counter test_npath_counter.cpp)
+ADD_TEST(test_npath_counter test_npath_counter)
 

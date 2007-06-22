@@ -64,8 +64,7 @@ static const tag_format_t tag_table[] =
 };
 
 void
-gcov_reader::tag_function (const char *filename ATTRIBUTE_UNUSED,
-	      unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
+gcov_reader::tag_function (const char* /*filename*/, unsigned /*tag*/, unsigned length)
 {
   unsigned long pos = gcov_position ();
 
@@ -88,8 +87,8 @@ gcov_reader::tag_function (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-gcov_reader::tag_blocks (const char *filename ATTRIBUTE_UNUSED,
-	    unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
+gcov_reader::tag_blocks (const char* /*filename*/,
+						 unsigned /*tag*/, unsigned length)
 {
   unsigned n_blocks = GCOV_TAG_BLOCKS_NUM (length);
 
@@ -114,8 +113,8 @@ gcov_reader::tag_blocks (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-gcov_reader::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
-				  unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
+gcov_reader::tag_arcs (const char* /*filename*/,
+					   unsigned /*tag*/, unsigned length)
 {
 //	std::cout << "tag_arcs start" << std::endl;
 	unsigned n_arcs = GCOV_TAG_ARCS_NUM (length);
@@ -150,8 +149,8 @@ gcov_reader::tag_arcs (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-gcov_reader::tag_lines (const char *filename ATTRIBUTE_UNUSED,
-				   unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
+gcov_reader::tag_lines (const char* /*filename*/,
+						unsigned /*tag*/, unsigned /*length*/)
 {
 //	std::cout << "tag_lines" << std::endl;
 	if (flag_dump_contents)
@@ -197,8 +196,8 @@ gcov_reader::tag_lines (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-gcov_reader::tag_counters (const char *filename ATTRIBUTE_UNUSED,
-	      unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
+gcov_reader::tag_counters (const char* /*filename*/,
+						   unsigned /*tag*/, unsigned length)
 {
 	//static const char *const counter_names[] = GCOV_COUNTER_NAMES;
   unsigned n_counts = GCOV_TAG_COUNTER_NUM (length);
@@ -227,8 +226,8 @@ gcov_reader::tag_counters (const char *filename ATTRIBUTE_UNUSED,
 }
 
 void
-gcov_reader::tag_summary (const char* filename ATTRIBUTE_UNUSED,
-	     unsigned tag ATTRIBUTE_UNUSED, unsigned length ATTRIBUTE_UNUSED)
+gcov_reader::tag_summary (const char* /*filename*/,
+						  unsigned /*tag*/, unsigned /*length*/)
 {
   struct gcov_summary summary;
   unsigned ix;

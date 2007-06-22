@@ -37,13 +37,12 @@ public:
 	void process(FunctionData::ptr data);
 	void clear();
 	void add_edge(int src, int dest);
-	void calculate_npath();
-	void calculate_npath_2();
+	void calculate_npath(FunctionData::ptr data);
+	void calculate_npath_2(FunctionData::ptr data);
 	void report(int /*npath_threshold*/);
 private:
 	reporter& reporter_;	
 	Graph graph_;
-	FunctionData::ptr data_;
 	std::multimap<int, FunctionData::ptr> functions;
 };
 

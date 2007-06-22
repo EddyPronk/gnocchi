@@ -86,11 +86,11 @@ private:
 //		std::cout << data->cyclomatic_complexity << std::endl;
 		analyzer_.clear();
 		G.clear(); // = GraphvizDigraph();
-		analyzer_.set_data(data);
+		//analyzer_.set_data(data);
 		int expected = f();
 //		analyzer_.add_edge(boost::num_vertices(analyzer_.graph_) - 1, 0); // add extra edge 
 		//std::cout << "connected" << connected() << std::endl;
-		analyzer_.do_calculate_npath();
+		analyzer_.calculate_npath(data);
 		if(data->cyclomatic_complexity != expected)
 		{
 			std::cout << "fail" << std::endl;

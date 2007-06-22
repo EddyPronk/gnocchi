@@ -24,6 +24,11 @@ Boston, MA 02110-1301, USA.  */
 
 struct fixture : public reporter
 {
+	bool error;
+	fixture()
+		: error(false)
+	{
+	}
 	void on_function(FunctionData::ptr param)
 	{
 		std::cout << "on_function " << param->name << std::endl;
@@ -37,19 +42,18 @@ struct fixture : public reporter
 		data->npath_complexity_2 = npathpp;
 		expected_.insert(std::make_pair(fn, data));
 	}
-	bool check(const std::string& name, int expected, int actual)
+	void check(const std::string& name, int expected, int actual)
 	{
 		if(expected != actual)
 		{
-			std::cout << "FAIL : " << name << std::endl;
-			std::cout << "expected: " << expected << std::endl;
-			std::cout << "actual: " << actual << std::endl;
+			std::cout << "FAIL : " << name
+					  << " expected: " << expected
+					  << " actual: " << actual << std::endl;
+			error = true;
 		}
-		return false;
 	}
 	bool check()
 	{
-		bool error = false;
 		container::iterator pos(expected_.begin());
 		container::iterator end(expected_.end());
 		for(; pos != end; ++pos)
@@ -62,9 +66,10 @@ struct fixture : public reporter
 			}
 			else
 			{
-				check("cyclomatic_complexity", pos->second->cyclomatic_complexity, actual->second->cyclomatic_complexity);
+				std::cout << "check: " << pos->first << std::endl;
+				//check("cyclomatic_complexity", pos->second->cyclomatic_complexity, actual->second->cyclomatic_complexity);
 				check("npath_complexity", pos->second->npath_complexity, actual->second->npath_complexity);
-				check("npath_complexity_2", pos->second->npath_complexity_2, actual->second->npath_complexity_2);
+				//check("npath_complexity_2", pos->second->npath_complexity_2, actual->second->npath_complexity_2);
 			}
 		}
 		return error;
@@ -88,16 +93,18 @@ int main()
 	f.add_test(0, 16, 31, "example_2");
 	f.add_test(0, 5, 5, "example_3");
 	f.add_test(0, 4, 4, "example_4");
-	f.add_test(0, 4, 4, "example_5");
+	//f.add_test(0, 4, 4, "example_5");
+	f.add_test(0, 1, 4, "if_return");
+	f.add_test(0, 6, 4, "if_return2");
 #endif
-	f.add_test(0, 3, 3, "_Z4foo3i");
+	//f.add_test(0, 3, 3, "_Z4foo3i");
 
 	Analyser a(f);
 	gcov_reader reader(a);
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
 
-	a.report();
+	a.report(0);
 	bool error = f.check();
 	return (error == true);
 }

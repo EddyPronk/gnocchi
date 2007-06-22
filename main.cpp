@@ -42,11 +42,6 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace std;
 
-class report_printer
-{
-public:
-};
-
 static void print_version (void);
 
 class file_processor : public reporter

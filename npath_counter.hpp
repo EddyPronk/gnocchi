@@ -19,6 +19,8 @@ Boston, MA 02110-1301, USA.  */
 #ifndef NPATH_COUNTER_HPP
 #define NPATH_COUNTER_HPP
 
+#include <boost/graph/depth_first_search.hpp>
+
 struct Parent
 {
 	Parent()

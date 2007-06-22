@@ -41,7 +41,7 @@ void Analyser::clear()
 	graph_.clear();
 }
 
-void Analyser::calculate_npath_2()
+void Analyser::calculate_npath_2(FunctionData::ptr data)
 {
 	clear_vertex(0, graph_);
 	remove_vertex(0, graph_);
@@ -54,10 +54,10 @@ void Analyser::calculate_npath_2()
 	vector<Vertex> complexity(num_vertices(graph_));
 	int cyclomatic_complexity = 0;
 	depth_first_search(graph_, visitor(npath_counter(parents, complexity, cyclomatic_complexity)));
-	data_->npath_complexity_2 = complexity[0];
+	data->npath_complexity_2 = complexity[0];
 }
 
-void Analyser::calculate_npath()
+void Analyser::calculate_npath(FunctionData::ptr data)
 {
 	if(num_vertices(graph_) > 2)
 	{
@@ -71,9 +71,9 @@ void Analyser::calculate_npath()
 	depth_first_search(graph_, visitor(npath_counter(
 										   parents,
 										   complexity,
-										   data_->cyclomatic_complexity
+										   data->cyclomatic_complexity
 										   )));
-	data_->npath_complexity = complexity[0];
+	data->npath_complexity = complexity[0];
 
 // 	string filename = func_name + string(".simple.dot");
 // 	ofstream os(filename.c_str());
@@ -82,13 +82,11 @@ void Analyser::calculate_npath()
 
 void Analyser::process(FunctionData::ptr data)
 {
-	data_ = data;
-
 	if(num_vertices(graph_))
 	{
-		calculate_npath_2();
-		calculate_npath();
-		functions.insert(std::make_pair(data_->npath_complexity, data_));
+		calculate_npath_2(data);
+		calculate_npath(data);
+		functions.insert(std::make_pair(data->npath_complexity, data));
 	}
 }
 

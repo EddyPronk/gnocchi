@@ -29,9 +29,9 @@ C++ EXCEPTIONS
 
 For every function call, GCC inserts extra paths which are used when
 an exception occurs. This "experimental" measure is now part of the
-output between braces.
+output.
 
-mccabe=5(+4) means the complexity is 5 + 4 = 9 is exceptions are considered.
+mccabe=5(+4) means the complexity is 5 + 4 = 9 if exceptions are considered.
  
 ./gnocchi -t 1  test_input.gcno 
 test_input.c:10: mccabe=2 npath=2

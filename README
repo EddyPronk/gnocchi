@@ -25,6 +25,24 @@ This is compiler style output pointing out which functions have a high
 complexity. By default it outputs all functions with a NPATH
 complexity higher than 200.
 
+C++ EXCEPTIONS
+
+For every function call, GCC inserts extra paths which are used when
+an exception occurs. This "experimental" measure is now part of the
+output between braces.
+
+mccabe=5(+4) means the complexity is 5 + 4 = 9 is exceptions are considered.
+ 
+./gnocchi -t 1  test_input.gcno 
+test_input.c:10: mccabe=2 npath=2
+test_input.c:19: mccabe=2(+1) npath=2(+1) 
+test_input.c:28: mccabe=2 npath=2
+test_input.c:40: mccabe=4 npath=4
+test_input.c:145: mccabe=3 npath=4
+test_input.c:159: mccabe=3 npath=4
+test_input.c:118: mccabe=5 npath=5
+test_input.c:89: mccabe=5(+4) npath=16(+15) 
+test_input.c:67: mccabe=9 npath=80
 
 GETTING GNOCCHI
 
@@ -39,7 +57,6 @@ or get the latest sources from
 
 RUNNING GNOCCHI
 
-	./autogen.sh (ju
 	./configure
 	make
 

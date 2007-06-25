@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(gnocchi, 0.22, epronk@muftor.com)
+AC_INIT(gnocchi, 0.31, epronk@muftor.com)
 AM_INIT_AUTOMAKE
 AC_CONFIG_FILES([Makefile])
 

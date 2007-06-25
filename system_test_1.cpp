@@ -39,7 +39,7 @@ struct fixture : public reporter
 		FunctionData::ptr data(new FunctionData);
 		data->cyclomatic_complexity = c;
 		data->npath_complexity = npath;
-		data->npath_complexity_2 = npathpp;
+		data->npath_complexity_e = npathpp;
 		expected_.insert(std::make_pair(fn, data));
 	}
 	void check(const std::string& name, int expected, int actual)
@@ -82,7 +82,7 @@ struct fixture : public reporter
 int main()
 {
 	fixture f;
-#if 1
+
 	f.add_test(0, 1, 1, "action");
 	f.add_test(0, 1, 1, "func_empty");
 	f.add_test(0, 2, 2, "func_if_with_assignment");
@@ -93,11 +93,6 @@ int main()
 	f.add_test(0, 16, 31, "example_2");
 	f.add_test(0, 5, 5, "example_3");
 	f.add_test(0, 4, 4, "example_4");
-	//f.add_test(0, 4, 4, "example_5");
-	f.add_test(0, 1, 4, "if_return");
-	f.add_test(0, 6, 4, "if_return2");
-#endif
-	//f.add_test(0, 3, 3, "_Z4foo3i");
 
 	Analyser a(f);
 	gcov_reader reader(a);

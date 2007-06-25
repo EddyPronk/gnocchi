@@ -29,14 +29,16 @@ struct FunctionData
 		: line_number(0)
 		, cyclomatic_complexity(0)
 		, npath_complexity(0)
-		, npath_complexity_2(0)
+		, cyclomatic_complexity_e(0)
+		, npath_complexity_e(0)
 	{}
 	std::string name;
 	std::string filename;
 	int line_number;
 	int cyclomatic_complexity;
 	int npath_complexity;
-	int npath_complexity_2;
+	int cyclomatic_complexity_e;
+	int npath_complexity_e;
 };
 
 #endif

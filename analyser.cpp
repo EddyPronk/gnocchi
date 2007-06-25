@@ -52,9 +52,11 @@ void Analyser::calculate_npath_2(FunctionData::ptr data)
 
 	vector<Parent> parents(num_vertices(graph_));
 	vector<Vertex> complexity(num_vertices(graph_));
-	int cyclomatic_complexity = 0;
-	depth_first_search(graph_, visitor(npath_counter(parents, complexity, cyclomatic_complexity)));
-	data->npath_complexity_2 = complexity[0];
+	depth_first_search(graph_, visitor(npath_counter(
+										   parents,
+										   complexity,
+										   data->cyclomatic_complexity_e)));
+	data->npath_complexity_e = complexity[0];
 }
 
 void Analyser::calculate_npath(FunctionData::ptr data)
@@ -71,8 +73,7 @@ void Analyser::calculate_npath(FunctionData::ptr data)
 	depth_first_search(graph_, visitor(npath_counter(
 										   parents,
 										   complexity,
-										   data->cyclomatic_complexity
-										   )));
+										   data->cyclomatic_complexity)));
 	data->npath_complexity = complexity[0];
 
 // 	string filename = func_name + string(".simple.dot");

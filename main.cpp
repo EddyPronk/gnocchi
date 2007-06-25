@@ -51,29 +51,42 @@ class file_processor : public reporter
 
 	virtual void on_function(FunctionData::ptr param)
 	{
-		filemap_t::iterator found = map.find(param->filename);
-
-		if (found != map.end())
-		{
-			cout
-				<< found->second.string() << ":"
-				<< param->line_number << ": mccabe="
-				<< param->cyclomatic_complexity << " npath="
-				<< param->npath_complexity << " "
-				<< endl;
-		}
+ 		filemap_t::iterator found = map.find(param->filename);
+		
+ 		if (found != map.end())
+ 		{
+			cout << found->second.string();
+ 		}
 		else
 		{
-			cout
-				<< param->filename << ":"
-				<< param->line_number << ": mccabe="
-				<< param->cyclomatic_complexity << " npath="
-				<< param->npath_complexity << " "
-				<< endl;
+			cout << param->filename;
 		}
-	}
+		
+#if 0
+		cout  << ":" << param->line_number << ":"
+			  << " mccabe=" << param->cyclomatic_complexity
+			  << " npath=" << param->npath_complexity 
+			  << " mccabe=" << param->cyclomatic_complexity_e
+			  << " npath=" << param->npath_complexity_e 
+			  << endl;
+#else
+		int npath_delta = param->npath_complexity_e - param->npath_complexity;
+		assert(npath_delta >= 0);
+		int cyclomatic_delta = param->cyclomatic_complexity_e - param->cyclomatic_complexity;
+		assert(cyclomatic_delta >= 0);
+		
+		cout  << ":" << param->line_number << ":"
+			  << " mccabe=" << param->cyclomatic_complexity;
+		if(cyclomatic_delta > 0)	
+			cout << "(+" << cyclomatic_delta << ")";
+		cout << " npath=" << param->npath_complexity;
+		if(npath_delta > 0)	
+			cout << "(+" << npath_delta << ") ";
+		cout << endl;
+#endif
 
-	
+}
+
 	filelist_t filelist;
 	filemap_t map;
 public:

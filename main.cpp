@@ -169,6 +169,7 @@ public:
 int main(int ac, char* av[])
 {
 	// FIXME unlock_std_streams ();
+	fs::path::default_name_check( fs::native );
 
 	try
 	{

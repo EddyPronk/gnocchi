@@ -20,6 +20,7 @@ Boston, MA 02110-1301, USA.  */
 #define GCOV_FUNCTION_DATA
 
 #include <string>
+#include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
 
 struct FunctionData
@@ -33,12 +34,12 @@ struct FunctionData
 		, npath_complexity_e(0)
 	{}
 	std::string name;
-	std::string filename;
+	boost::filesystem::path filename;
 	int line_number;
-	int cyclomatic_complexity;
-	int npath_complexity;
-	int cyclomatic_complexity_e;
-	int npath_complexity_e;
+	long long cyclomatic_complexity;
+	long long npath_complexity;
+	long long cyclomatic_complexity_e;
+	long long npath_complexity_e;
 };
 
 #endif

@@ -47,7 +47,7 @@ struct Parent
 class npath_counter : public boost::dfs_visitor<>
 {
 public:
-    npath_counter(std::vector<Parent>& pp, std::vector<Vertex>& qq, int& c)
+    npath_counter(std::vector<Parent>& pp, std::vector<Vertex>& qq, long long& c)
 		: cabe(c)
 		, parent(pp)
 		, complexity(qq)
@@ -90,7 +90,7 @@ public:
 			if(parent[u].defined_)
 				complexity[parent[u]] += complexity[u];
     }
-	int& cabe;
+	long long& cabe;
 private:
 	std::vector<Parent>& parent;
 	std::vector<Vertex>& complexity;

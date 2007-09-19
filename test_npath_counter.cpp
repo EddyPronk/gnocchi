@@ -39,7 +39,7 @@ struct Fixture
 		parents.resize(num_vertices(g));
 		complexity.resize(num_vertices(g));
 			
-		int cyclomatic_complexity = 0;
+		long long cyclomatic_complexity = 0;
 		depth_first_search(g, visitor(npath_counter(
 											   parents,
 											   complexity,

@@ -27,6 +27,7 @@ Boston, MA 02110-1301, USA.  */
 #include <string>
 #include "function_data.hpp"
 #include <boost/filesystem/path.hpp>
+#include <map>
 
 class Analyser;
 
@@ -34,8 +35,11 @@ struct gcov_reader
 {
 	Analyser& analyser;
 	FunctionData::ptr data_;
-	gcov_reader(Analyser& a)
+	std::map<int,int> block_map_;
+	bool write_annotated_source_;
+	gcov_reader(Analyser& a, bool write_annotated_source)
 		: analyser(a)
+		, write_annotated_source_(write_annotated_source)
 	{
 	}
 	void open(const boost::filesystem::path& filename);
@@ -46,6 +50,7 @@ struct gcov_reader
 	void tag_counters (const char*, unsigned, unsigned);
 	void tag_summary (const char*, unsigned, unsigned);
 	void process_graph();
+	void print_file(const std::string& filename);
 };
 
 #endif

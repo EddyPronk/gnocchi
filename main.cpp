@@ -59,7 +59,7 @@ class file_processor : public reporter
  		}
 		else
 		{
-			cout << param->filename;
+			cout << param->filename.string();
 		}
 		
 #if 0
@@ -70,7 +70,7 @@ class file_processor : public reporter
 			  << " npath=" << param->npath_complexity_e 
 			  << endl;
 #else
-		int npath_delta = param->npath_complexity_e - param->npath_complexity;
+		long long npath_delta = param->npath_complexity_e - param->npath_complexity;
 		assert(npath_delta >= 0);
 		int cyclomatic_delta = param->cyclomatic_complexity_e - param->cyclomatic_complexity;
 		assert(cyclomatic_delta >= 0);
@@ -182,8 +182,11 @@ int main(int ac, char* av[])
 
 		po::options_description config("Configuration");
 		config.add_options()
-			("threshold,t", po::value<int>(&threshold)->default_value(200), 
+			("threshold,t", po::value<int>(&threshold)->default_value(1), 
 			 "npath threshold");
+
+		config.add_options()
+			("annotate", "Write gcov style annotated source files.");
 
 		po::options_description hidden("Hidden options");
 
@@ -203,7 +206,8 @@ int main(int ac, char* av[])
 			  options(cmdline_options).positional(p).run(), options);
 		notify(options);
 
-		if (options.count("help")) {
+		if (options.count("help"))
+		{
 			cout << visible << "\n";
 			return 0;
 		}
@@ -217,11 +221,16 @@ int main(int ac, char* av[])
 		//report_printer r;
 		file_processor processor;
 		Analyser a(processor);
-		gcov_reader reader(a);
+		gcov_reader reader(a, options.count("annotate"));
 
 		if (options.count("input-file"))
 		{
 			processor.process(options["input-file"].as< vector<string> >());
+		}
+		else
+		{
+			cerr << "gnocchi: no input files" << endl;
+			return 1;
 		}
 
 		processor.invoke(boost::bind(&gcov_reader::open, &reader, _1));
@@ -239,7 +248,7 @@ int main(int ac, char* av[])
 static void
 print_version (void)
 {
-	printf ("gnocchi %s\n", version_string);
+	cout << "gnocchi " << version_string;
 	printf ("Copyright (C) 2007 Eddy Pronk.\n");
 	printf ("This is free software; see the source for copying conditions.\n"
 			"There is NO warranty; not even for MERCHANTABILITY or \n"

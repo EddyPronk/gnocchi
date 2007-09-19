@@ -24,8 +24,15 @@ Boston, MA 02110-1301, USA.  */
 #include "gcov_reader.hpp"
 #include "analyser.hpp"
 #include <iostream>
+#include <iomanip>
+#include <stdexcept>
+#include <fstream>
+#include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 namespace fs = boost::filesystem;
+using namespace std;
+using namespace boost;
 
 extern "C"
 {
@@ -81,39 +88,42 @@ gcov_reader::tag_function (const char* /*filename*/, unsigned /*tag*/, unsigned 
 	  data_->name = name;
 	  data_->line_number = 0; // hacky
 	  analyser.clear();
-      name = gcov_read_string ();
+	  //block_map.clear(); // hacky
+
+	  data_->filename = gcov_read_string ();
       gcov_read_unsigned();
     }
 }
 
 void
-gcov_reader::tag_blocks (const char* /*filename*/,
+gcov_reader::tag_blocks (const char* filename,
 						 unsigned /*tag*/, unsigned length)
 {
-  unsigned n_blocks = GCOV_TAG_BLOCKS_NUM (length);
+	unsigned n_blocks = GCOV_TAG_BLOCKS_NUM (length);
 
 //  printf (" %u blocks", n_blocks);
 
-  if (flag_dump_contents)
+	if (flag_dump_contents)
     {
-      unsigned ix;
+		unsigned ix;
 
-      for (ix = 0; ix != n_blocks; ix++)
-	{
-	  if (!(ix & 7))
-	    {
-	      //printf ("\n");
-	      //print_prefix (filename, 0, gcov_position ());
-	      //printf ("\t\t%u", ix);
-	    }
-	  //printf (" %04x", gcov_read_unsigned ());
-	  gcov_read_unsigned();
-	}
+		for (ix = 0; ix != n_blocks; ix++)
+		{
+			if (!(ix & 7))
+			{
+				//printf ("\n");
+				//print_prefix (filename, 0, gcov_position ());
+//				cout << filename << endl;
+				//printf ("\t\t%u", ix);
+			}
+			//printf (" %04x", gcov_read_unsigned ());
+			gcov_read_unsigned();
+		}
     }
 }
 
 void
-gcov_reader::tag_arcs (const char* /*filename*/,
+gcov_reader::tag_arcs (const char* filename,
 					   unsigned /*tag*/, unsigned length)
 {
 //	std::cout << "tag_arcs start" << std::endl;
@@ -134,6 +144,7 @@ gcov_reader::tag_arcs (const char* /*filename*/,
 //				printf ("\n");
 //				print_prefix (filename, 0, gcov_position ());
 //				printf ("\ttag_arcs block %u:", blockno);
+//				cout << filename << " " << blockno << endl;
 //				os_ << "[ block " << blockno << "]"  << std::endl;
 			}
 			dst = gcov_read_unsigned ();
@@ -155,25 +166,54 @@ gcov_reader::tag_lines (const char* /*filename*/,
 //	std::cout << "tag_lines" << std::endl;
 	if (flag_dump_contents)
     {
-		/* unsigned blockno = */ gcov_read_unsigned ();
+		unsigned blockno = gcov_read_unsigned ();
 //		int first_line = 0;
 
+		fs::path filename;
 		while (1)
 		{
 			/* gcov_position_t position = */ gcov_position ();
 			const char *source = NULL;
 			unsigned lineno = gcov_read_unsigned ();
-			//std::cout << lineno << std::endl;
 
 			if (!lineno)
 			{
 				source = gcov_read_string ();
 				if (!source)
 					break;
-				data_->filename = fs::path(std::string(source), fs::native).string();
+				// Detect functions with references to other source files.
+				filename = std::string(source), fs::native;
+#if 1
+				if(data_->filename != filename)
+				{
+					cout << "in: " << data_->name << " ";
+					cout << data_->filename.string() << "!=" << filename.string() << endl;
+				}
+#endif
 			}
 			else
 			{
+#if 0
+ 				std::cout << "filename:" << data_->filename.string()
+						  << " block:" << blockno
+						  << " line:" << lineno << std::endl;
+#endif
+
+#if 1
+				if(data_->filename == filename)
+				{
+					if(block_map_.find(lineno) == block_map_.end())
+					{
+						block_map_.insert(make_pair(lineno, blockno));
+					}
+					else
+					{
+						if(block_map_[lineno] != blockno)
+							cout << format("already have line %1%, block %2%") % lineno % block_map_[lineno] << endl;
+					}
+				}
+#endif
+
  				if(!data_->line_number)
  				{
  					data_->line_number = lineno;
@@ -249,8 +289,9 @@ gcov_reader::tag_summary (const char* /*filename*/,
 
 void gcov_reader::open(const boost::filesystem::path& path)
 {
+	block_map_.clear(); // hacky
 	const char* filename(path.string().c_str());
-
+	cout << "reading " << filename << endl;
 	unsigned tags[4];
 	unsigned depth = 0;
 
@@ -392,5 +433,38 @@ void gcov_reader::open(const boost::filesystem::path& path)
 		}
     }
 	analyser.process(data_);
+	if(write_annotated_source_)
+		print_file(filename);
 	gcov_close ();
 }
+
+void gcov_reader::print_file(const std::string& filename)
+{
+	cout << data_->filename.string().c_str() << endl;
+	ifstream is(data_->filename.string().c_str());
+	ofstream os((data_->filename.string() + ".gcov").c_str());
+
+	os << "        -:    0:Source:" << data_->filename.string() << endl
+	   << "        -:    0:Graph:" << filename << endl;
+		// << "        -:    0:Data:before.gcda" << endl
+		// << "        -:    0:Runs:1" << endl
+		// << "        -:    0:Programs:1" << endl;
+	
+	assert(!is.fail());
+	int lineno = 1;
+	while(!is.eof())
+ 	{
+ 		char buffer[1024];
+ 		is.getline(buffer, 1024);
+		string prefix = "-";
+		if(block_map_.find(lineno) != block_map_.end())
+		{
+			prefix = lexical_cast<std::string>(block_map_[lineno]);
+		}
+
+		os << setw(9) << prefix << ":" << setw(5) << right << lineno << ":"
+		   << buffer << endl;
+ 		++lineno;
+	}
+}
+

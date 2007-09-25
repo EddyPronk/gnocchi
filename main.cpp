@@ -178,7 +178,8 @@ int main(int ac, char* av[])
 
 		generic.add_options()
 			("version,v", "print version string")
-			("help,h", "produce help message");
+			("help,h", "produce help message")
+			("verbose", "be verbose");
 
 		po::options_description config("Configuration");
 		config.add_options()
@@ -221,7 +222,7 @@ int main(int ac, char* av[])
 		//report_printer r;
 		file_processor processor;
 		Analyser a(processor);
-		gcov_reader reader(a, options.count("annotate"));
+		gcov_reader reader(a, options);
 
 		if (options.count("input-file"))
 		{

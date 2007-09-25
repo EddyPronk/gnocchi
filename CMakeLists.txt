@@ -27,7 +27,7 @@ ADD_EXECUTABLE(gnocchi
   )
 
 TARGET_LINK_LIBRARIES(core boost_filesystem)
-TARGET_LINK_LIBRARIES(gnocchi boost_program_options)
+TARGET_LINK_LIBRARIES(core boost_program_options)
 
 ADD_LIBRARY(test_input
   test_input.c
@@ -39,8 +39,9 @@ ADD_EXECUTABLE(system_test_1 system_test_1.cpp)
 ADD_TEST(system_test_1 system_test_1)
 
 ADD_EXECUTABLE(test_mccabe test_mccabe.cpp)
-TARGET_LINK_LIBRARIES(test_mccabe bgl-viz)
+TARGET_LINK_LIBRARIES(test_mccabe boost_graph)
 
 ADD_EXECUTABLE(test_npath_counter test_npath_counter.cpp)
 ADD_TEST(test_npath_counter test_npath_counter)
 
+ADD_EXECUTABLE(before before.cpp)

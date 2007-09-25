@@ -287,6 +287,14 @@ gcov_reader::tag_summary (const char* /*filename*/,
     }
 }
 
+std::string version_to_string(unsigned v)
+{
+	char e[5];
+	GCOV_UNSIGNED2STRING (e, v);
+	e[4] = '\0';
+	return e;
+}
+
 void gcov_reader::open(const boost::filesystem::path& path)
 {
 	block_map_.clear(); // hacky
@@ -325,12 +333,11 @@ void gcov_reader::open(const boost::filesystem::path& path)
     
 // 		printf ("%s:%s:magic `%.4s':version `%.4s'%s\n", filename, type,
 // 				m, v, endianness < 0 ? " (swapped endianness)" : "");
-		if (version != GCOV_VERSION)
+		
+		if (version != GCOV_VERSION and options_.count("verbose"))
 		{
-			char e[4];
-	
-			GCOV_UNSIGNED2STRING (e, GCOV_VERSION);
-			printf ("%s:warning:current version is `%.4s'\n", filename, e);
+			cout << format("%1%:warning:current version is `%2%' expected `%3%'\n")
+				% filename % version_to_string(version) % version_to_string(GCOV_VERSION);
 		}
 	}
 
@@ -433,7 +440,7 @@ void gcov_reader::open(const boost::filesystem::path& path)
 		}
     }
 	analyser.process(data_);
-	if(write_annotated_source_)
+	if(options_.count("annotate"))
 		print_file(filename);
 	gcov_close ();
 }

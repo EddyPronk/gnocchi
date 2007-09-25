@@ -27,6 +27,7 @@ Boston, MA 02110-1301, USA.  */
 #include <string>
 #include "function_data.hpp"
 #include <boost/filesystem/path.hpp>
+#include <boost/program_options.hpp>
 #include <map>
 
 class Analyser;
@@ -36,10 +37,10 @@ struct gcov_reader
 	Analyser& analyser;
 	FunctionData::ptr data_;
 	std::map<int,int> block_map_;
-	bool write_annotated_source_;
-	gcov_reader(Analyser& a, bool write_annotated_source)
+	boost::program_options::variables_map options_;
+	gcov_reader(Analyser& a, boost::program_options::variables_map options = boost::program_options::variables_map())
 		: analyser(a)
-		, write_annotated_source_(write_annotated_source)
+		, options_(options)
 	{
 	}
 	void open(const boost::filesystem::path& filename);

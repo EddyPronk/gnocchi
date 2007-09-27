@@ -36,7 +36,7 @@ struct gcov_reader
 {
 	Analyser& analyser;
 	FunctionData::ptr data_;
-	std::map<int,int> block_map_;
+	std::multimap<int,int> block_map_;
 	boost::program_options::variables_map options_;
 	gcov_reader(Analyser& a, boost::program_options::variables_map options = boost::program_options::variables_map())
 		: analyser(a)

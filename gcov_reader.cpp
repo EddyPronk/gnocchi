@@ -202,16 +202,16 @@ gcov_reader::tag_lines (const char* /*filename*/,
 #if 1
 				if(data_->filename == filename)
 				{
-					if(block_map_.find(lineno) == block_map_.end())
-					{
+//					if(block_map_.find(lineno) == block_map_.end())
+//					{
 						block_map_.insert(make_pair(lineno, blockno));
-					}
-					else
-					{
-						if(block_map_[lineno] != blockno)
-							cout << format("already have line %1%, block %2%") % lineno % block_map_[lineno] << endl;
-					}
-				}
+//					}
+// 					else
+// 					{
+// 						if(block_map_[lineno] != blockno)
+// 							cout << format("already have line %1%, block %2%") % lineno % block_map_[lineno] << endl;
+// 					}
+ 				}
 #endif
 
  				if(!data_->line_number)
@@ -240,28 +240,28 @@ gcov_reader::tag_counters (const char* /*filename*/,
 						   unsigned /*tag*/, unsigned length)
 {
 	//static const char *const counter_names[] = GCOV_COUNTER_NAMES;
-  unsigned n_counts = GCOV_TAG_COUNTER_NUM (length);
+	unsigned n_counts = GCOV_TAG_COUNTER_NUM (length);
 
 //  printf (" %s %u counts", counter_names[GCOV_COUNTER_FOR_TAG (tag)], n_counts);
-  if (flag_dump_contents)
+	if (flag_dump_contents)
     {
-      unsigned ix;
+		unsigned ix;
 
-      for (ix = 0; ix != n_counts; ix++)
-	{
-	  gcov_type count;
+		for (ix = 0; ix != n_counts; ix++)
+		{
+			gcov_type count;
 
-	  if (!(ix & 7))
-	    {
+			if (!(ix & 7))
+			{
 //	      printf ("\n");
 //	      print_prefix (filename, 0, gcov_position ());
 //	      printf ("\t\t%u", ix);
-	    }
+			}
 
-	  count = gcov_read_counter ();
+			count = gcov_read_counter ();
 //	  printf (" ");
 //	  printf (HOST_WIDEST_INT_PRINT_DEC, count);
-	}
+		}
     }
 }
 
@@ -299,7 +299,10 @@ void gcov_reader::open(const boost::filesystem::path& path)
 {
 	block_map_.clear(); // hacky
 	const char* filename(path.string().c_str());
-	cout << "reading " << filename << endl;
+
+	if(options_.count("verbose"))
+		cout << "reading " << filename << endl;
+
 	unsigned tags[4];
 	unsigned depth = 0;
 
@@ -447,7 +450,6 @@ void gcov_reader::open(const boost::filesystem::path& path)
 
 void gcov_reader::print_file(const std::string& filename)
 {
-	cout << data_->filename.string().c_str() << endl;
 	ifstream is(data_->filename.string().c_str());
 	ofstream os((data_->filename.string() + ".gcov").c_str());
 
@@ -464,9 +466,18 @@ void gcov_reader::print_file(const std::string& filename)
  		char buffer[1024];
  		is.getline(buffer, 1024);
 		string prefix = "-";
-		if(block_map_.find(lineno) != block_map_.end())
+		std::multimap<int,int>::iterator pos = block_map_.lower_bound(lineno);
+		if(pos != block_map_.upper_bound(lineno))
 		{
-			prefix = lexical_cast<std::string>(block_map_[lineno]);
+			prefix = lexical_cast<std::string>(pos->second);
+			++pos;
+		}
+		for(;pos != block_map_.upper_bound(lineno); ++pos)
+		{
+			prefix += "," + lexical_cast<std::string>(pos->second);
+		}
+//		if(block_map_.find(lineno) != block_map_.end())
+		{
 		}
 
 		os << setw(9) << prefix << ":" << setw(5) << right << lineno << ":"

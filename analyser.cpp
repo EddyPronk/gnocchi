@@ -112,7 +112,8 @@ void Analyser::annotate_file(FunctionData::ptr data, const std::string& filename
 	
 	for(;pos != data->block_map.end(); ++pos)
 	{
-		data->annotation[pos->first] = complexity[pos->second];
+		if(data->annotation[pos->first] < complexity[pos->second])
+			data->annotation[pos->first] = complexity[pos->second];
 	}
 }
 

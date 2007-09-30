@@ -90,7 +90,8 @@ private:
 		int expected = f();
 //		analyzer_.add_edge(boost::num_vertices(analyzer_.graph_) - 1, 0); // add extra edge 
 		//std::cout << "connected" << connected() << std::endl;
-		analyzer_.calculate_npath(data);
+		std::map<int,int> annotation;
+		analyzer_.calculate_npath(annotation, data);
 		if(data->cyclomatic_complexity != expected)
 		{
 			std::cout << "fail" << std::endl;

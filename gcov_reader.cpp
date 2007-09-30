@@ -82,7 +82,7 @@ gcov_reader::tag_function (const char* /*filename*/, unsigned /*tag*/, unsigned 
     {
       const char *name;
 
-	  analyser.process(data_);
+	  analyser.process(annotation, data_);
       name = gcov_read_string ();
 	  data_ = FunctionData::ptr(new FunctionData);
 	  data_->name = name;
@@ -442,7 +442,7 @@ void gcov_reader::open(const boost::filesystem::path& path)
 			break;
 		}
     }
-	analyser.process(data_);
+	analyser.process(annotation, data_);
 	if(options_.count("annotate"))
 		print_file(filename);
 	gcov_close ();
@@ -478,8 +478,8 @@ void gcov_reader::print_file(const std::string& filename)
 			prefix += "," + lexical_cast<std::string>(pos->second);
 		}
 #endif
-		if(data_->annotation.find(lineno) != data_->annotation.end())
-			prefix = lexical_cast<std::string>(data_->annotation.find(lineno)->second);
+		if(annotation.find(lineno) != annotation.end())
+			prefix = lexical_cast<std::string>(annotation.find(lineno)->second);
 
 		os << setw(9) << prefix << ":" << setw(5) << right << lineno << ":"
 		   << buffer << endl;

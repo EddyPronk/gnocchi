@@ -106,18 +106,18 @@ void Analyser::print_file(FunctionData::ptr data, const std::string& filename, c
 }
 #endif
 
-void Analyser::annotate_file(FunctionData::ptr data, const std::string& filename, const vector<Vertex>& complexity)
+void Analyser::annotate_file(std::map<int,int>& annotation, FunctionData::ptr data, const std::string& filename, const vector<Vertex>& complexity)
 {
 	std::multimap<int,int>::iterator pos = data->block_map.begin();
 	
 	for(;pos != data->block_map.end(); ++pos)
 	{
-		if(data->annotation[pos->first] < complexity[pos->second])
-			data->annotation[pos->first] = complexity[pos->second];
+		if(annotation[pos->first] < complexity[pos->second])
+			annotation[pos->first] = complexity[pos->second];
 	}
 }
 
-void Analyser::calculate_npath(FunctionData::ptr data)
+void Analyser::calculate_npath(std::map<int,int>& annotation, FunctionData::ptr data)
 {
 	if(num_vertices(graph_) > 2)
 	{
@@ -141,15 +141,15 @@ void Analyser::calculate_npath(FunctionData::ptr data)
  	ofstream os(filename.c_str());
  	write_graphviz(os, graph_);
 
-	annotate_file(data, data->filename.string(), complexity);
+	annotate_file(annotation, data, data->filename.string(), complexity);
 }
 
-void Analyser::process(FunctionData::ptr data)
+void Analyser::process(	std::map<int,int>& annotation, FunctionData::ptr data)
 {
 	if(num_vertices(graph_))
 	{
 		calculate_npath_2(data);
-		calculate_npath(data);
+		calculate_npath(annotation, data);
 		functions.insert(std::make_pair(data->npath_complexity, data));
 	}
 }

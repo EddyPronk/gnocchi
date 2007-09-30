@@ -42,13 +42,13 @@ public:
 		: reporter_(r)
 	{
 	}
-	void process(FunctionData::ptr data);
+	void process(std::map<int,int>& annotation,	FunctionData::ptr data);
 	void clear();
 	void add_edge(int src, int dest);
-	void calculate_npath(FunctionData::ptr data);
+	void calculate_npath(std::map<int,int>& annotation, FunctionData::ptr data);
 	void calculate_npath_2(FunctionData::ptr data);
 	void report(int /*npath_threshold*/);
-	void annotate_file(FunctionData::ptr data, const std::string& filename, const std::vector<Vertex>&);
+	void annotate_file(std::map<int,int>& annotation, FunctionData::ptr data, const std::string& filename, const std::vector<Vertex>&);
 private:
 	reporter& reporter_;	
 	Graph graph_;	

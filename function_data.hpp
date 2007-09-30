@@ -45,7 +45,6 @@ struct FunctionData
 	long long cyclomatic_complexity_e;
 	long long npath_complexity_e;
 	std::multimap<int,int> block_map;
-	std::map<int,int> annotation;
 };
 
 #endif

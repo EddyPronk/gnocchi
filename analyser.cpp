@@ -17,6 +17,7 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.  */
 
 #include <fstream>
+#include <iomanip>
 #include "analyser.hpp"
 
 #include <boost/graph/depth_first_search.hpp>
@@ -44,11 +45,11 @@ void Analyser::clear()
 void Analyser::calculate_npath_2(FunctionData::ptr data)
 {
 	clear_vertex(0, graph_);
-	remove_vertex(0, graph_);
+	//remove_vertex(0, graph_);
 
-// 	string filename = func_name + string(".dot");
-// 	ofstream os(filename.c_str());
-// 	write_graphviz(os, graph_);
+//  	string filename = data->name + string(".dot");
+//  	ofstream os(filename.c_str());
+//  	write_graphviz(os, graph_);
 
 	vector<Parent> parents(num_vertices(graph_));
 	vector<Vertex> complexity(num_vertices(graph_));
@@ -56,7 +57,63 @@ void Analyser::calculate_npath_2(FunctionData::ptr data)
 										   parents,
 										   complexity,
 										   data->cyclomatic_complexity_e)));
-	data->npath_complexity_e = complexity[0];
+	data->npath_complexity_e = complexity[1];
+//  	for(int i = 0; i < complexity.size(); ++i)
+//  		cout << i << " " << complexity[i] << endl;
+}
+
+#if 0
+void Analyser::print_file(FunctionData::ptr data, const std::string& filename, const vector<Vertex>& complexity)
+{
+	cout << "print_file" << endl;
+	ifstream is(filename.c_str());
+	ofstream os((filename + ".gcov").c_str());
+
+	os << "        -:    0:Source:" << filename << endl
+	   << "        -:    0:Graph:" << filename << endl;
+		// << "        -:    0:Data:before.gcda" << endl
+		// << "        -:    0:Runs:1" << endl
+		// << "        -:    0:Programs:1" << endl;
+	
+	assert(!is.fail());
+	int lineno = 1;
+	while(!is.eof())
+ 	{
+ 		char buffer[1024];
+ 		is.getline(buffer, 1024);
+		std::multimap<int,int>::iterator pos = data->block_map.lower_bound(lineno);
+		unsigned int npath = 0;
+		bool has_prefix = false;
+		if(pos != data->block_map.upper_bound(lineno))
+		{
+			has_prefix = true;
+			npath = complexity[pos->second];
+			++pos;
+		}
+		for(;pos != data->block_map.upper_bound(lineno); ++pos)
+		{
+			npath = std::max(npath, complexity[pos->second]);
+		}
+		string prefix = "-";
+		if(has_prefix)
+			prefix = lexical_cast<string>(npath);
+
+
+		os << setw(9) << prefix << ":" << setw(5) << right << lineno << ":"
+		   << buffer << endl;
+ 		++lineno;
+	}
+}
+#endif
+
+void Analyser::annotate_file(FunctionData::ptr data, const std::string& filename, const vector<Vertex>& complexity)
+{
+	std::multimap<int,int>::iterator pos = data->block_map.begin();
+	
+	for(;pos != data->block_map.end(); ++pos)
+	{
+		data->annotation[pos->first] = complexity[pos->second];
+	}
 }
 
 void Analyser::calculate_npath(FunctionData::ptr data)
@@ -64,7 +121,7 @@ void Analyser::calculate_npath(FunctionData::ptr data)
 	if(num_vertices(graph_) > 2)
 	{
 		clear_vertex(num_vertices(graph_) - 1, graph_);
-		remove_vertex(num_vertices(graph_) - 1, graph_);
+		//remove_vertex(num_vertices(graph_) - 1, graph_);
 	}
   
 	vector<Parent> parents(num_vertices(graph_));
@@ -74,11 +131,16 @@ void Analyser::calculate_npath(FunctionData::ptr data)
 										   parents,
 										   complexity,
 										   data->cyclomatic_complexity)));
-	data->npath_complexity = complexity[0];
+	data->npath_complexity = complexity[1];
 
-// 	string filename = func_name + string(".simple.dot");
-// 	ofstream os(filename.c_str());
-// 	write_graphviz(os, graph_);
+//  	for(int i = 0; i < complexity.size(); ++i)
+//  		cout << i << " " << complexity[i] << endl;
+
+ 	string filename = data->name + string(".dot");
+ 	ofstream os(filename.c_str());
+ 	write_graphviz(os, graph_);
+
+	annotate_file(data, data->filename.string(), complexity);
 }
 
 void Analyser::process(FunctionData::ptr data)

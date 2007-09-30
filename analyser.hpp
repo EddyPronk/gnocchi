@@ -23,7 +23,15 @@ Boston, MA 02110-1301, USA.  */
 #include "reporter.hpp"
 #include "function_data.hpp"
 
-typedef boost::adjacency_list<> Graph;
+typedef boost::adjacency_list< 
+	boost::mapS, boost::vecS, boost::bidirectionalS,
+	boost::property<boost::vertex_color_t, boost::default_color_type,
+					boost::property<boost::vertex_degree_t, int,
+									boost::property<boost::vertex_in_degree_t, int,
+													boost::property<boost::vertex_out_degree_t, int> > > >
+	> Graph;
+//typedef boost::adjacency_list<> Graph;
+
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::vertices_size_type size_type;
 
@@ -40,10 +48,11 @@ public:
 	void calculate_npath(FunctionData::ptr data);
 	void calculate_npath_2(FunctionData::ptr data);
 	void report(int /*npath_threshold*/);
+	void annotate_file(FunctionData::ptr data, const std::string& filename, const std::vector<Vertex>&);
 private:
 	reporter& reporter_;	
-	Graph graph_;
-	std::multimap<int, FunctionData::ptr> functions;
+	Graph graph_;	
+std::multimap<int, FunctionData::ptr> functions;
 };
 
 #endif

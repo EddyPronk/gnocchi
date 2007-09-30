@@ -152,7 +152,7 @@ gcov_reader::tag_arcs (const char* filename,
 			//printf (" %u:%04x", dst, flags);
 //			if(flags == 4)
 			{
-				//		std::cout << blockno << " -> " << dst << std::endl;
+//				std::cout << blockno << " -> " << dst << std::endl;
 				analyser.add_edge(blockno, dst);
 			}
 		}
@@ -204,7 +204,7 @@ gcov_reader::tag_lines (const char* /*filename*/,
 				{
 //					if(block_map_.find(lineno) == block_map_.end())
 //					{
-						block_map_.insert(make_pair(lineno, blockno));
+						data_->block_map.insert(make_pair(lineno, blockno));
 //					}
 // 					else
 // 					{
@@ -297,7 +297,7 @@ std::string version_to_string(unsigned v)
 
 void gcov_reader::open(const boost::filesystem::path& path)
 {
-	block_map_.clear(); // hacky
+//	data_->block_map.clear(); // hacky
 	const char* filename(path.string().c_str());
 
 	if(options_.count("verbose"))
@@ -466,19 +466,20 @@ void gcov_reader::print_file(const std::string& filename)
  		char buffer[1024];
  		is.getline(buffer, 1024);
 		string prefix = "-";
-		std::multimap<int,int>::iterator pos = block_map_.lower_bound(lineno);
-		if(pos != block_map_.upper_bound(lineno))
+#if 0
+		std::multimap<int,int>::iterator pos = data_->block_map.lower_bound(lineno);
+		if(pos != data_->block_map.upper_bound(lineno))
 		{
 			prefix = lexical_cast<std::string>(pos->second);
 			++pos;
 		}
-		for(;pos != block_map_.upper_bound(lineno); ++pos)
+		for(;pos != data_->block_map.upper_bound(lineno); ++pos)
 		{
 			prefix += "," + lexical_cast<std::string>(pos->second);
 		}
-//		if(block_map_.find(lineno) != block_map_.end())
-		{
-		}
+#endif
+		if(data_->annotation.find(lineno) != data_->annotation.end())
+			prefix = lexical_cast<std::string>(data_->annotation.find(lineno)->second);
 
 		os << setw(9) << prefix << ":" << setw(5) << right << lineno << ":"
 		   << buffer << endl;

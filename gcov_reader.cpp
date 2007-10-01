@@ -29,6 +29,7 @@ Boston, MA 02110-1301, USA.  */
 #include <fstream>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <boost/bind.hpp>
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -443,12 +444,40 @@ void gcov_reader::open(const boost::filesystem::path& path)
 		}
     }
 	analyser.process(annotation, data_);
-	if(options_.count("annotate"))
-		print_file(filename);
+	if(options_.count("annotate-npath"))
+		print_file(filename, boost::bind(&gcov_reader::prefix_with_npath, this, _1));
+
+	if(options_.count("annotate-block"))
+		print_file(filename, boost::bind(&gcov_reader::prefix_with_block_number, this, _1));
+
 	gcov_close ();
 }
 
-void gcov_reader::print_file(const std::string& filename)
+std::string gcov_reader::prefix_with_npath(int lineno)
+{
+	if(annotation.find(lineno) != annotation.end())
+		return lexical_cast<std::string>(annotation.find(lineno)->second);
+	else
+		return "";
+}
+
+std::string gcov_reader::prefix_with_block_number(int lineno)
+{
+	string prefix;
+	std::multimap<int,int>::iterator pos = data_->block_map.lower_bound(lineno);
+	if(pos != data_->block_map.upper_bound(lineno))
+	{
+		prefix = lexical_cast<std::string>(pos->second);
+		++pos;
+	}
+	for(;pos != data_->block_map.upper_bound(lineno); ++pos)
+	{
+		prefix += "," + lexical_cast<std::string>(pos->second);
+	}
+	return prefix;
+}
+
+void gcov_reader::print_file(const std::string& filename, boost::function< std::string(int) > prefix)
 {
 	ifstream is(data_->filename.string().c_str());
 	ofstream os((data_->filename.string() + ".gcov").c_str());
@@ -465,23 +494,8 @@ void gcov_reader::print_file(const std::string& filename)
  	{
  		char buffer[1024];
  		is.getline(buffer, 1024);
-		string prefix = "-";
-#if 0
-		std::multimap<int,int>::iterator pos = data_->block_map.lower_bound(lineno);
-		if(pos != data_->block_map.upper_bound(lineno))
-		{
-			prefix = lexical_cast<std::string>(pos->second);
-			++pos;
-		}
-		for(;pos != data_->block_map.upper_bound(lineno); ++pos)
-		{
-			prefix += "," + lexical_cast<std::string>(pos->second);
-		}
-#endif
-		if(annotation.find(lineno) != annotation.end())
-			prefix = lexical_cast<std::string>(annotation.find(lineno)->second);
-
-		os << setw(9) << prefix << ":" << setw(5) << right << lineno << ":"
+		
+		os << setw(9) << prefix(lineno) << ":" << setw(5) << right << lineno << ":"
 		   << buffer << endl;
  		++lineno;
 	}

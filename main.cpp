@@ -187,7 +187,8 @@ int main(int ac, char* av[])
 			 "npath threshold");
 
 		config.add_options()
-			("annotate", "Write gcov style annotated source files.");
+			("annotate-npath", "Write gcov style annotated source files with npath")
+			("annotate-block", "Write gcov style annotated source files with block no.");
 
 		po::options_description hidden("Hidden options");
 

@@ -26,24 +26,27 @@ Boston, MA 02110-1301, USA.  */
 
 #include <string>
 #include "function_data.hpp"
+#include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 #include <map>
 
 class Analyser;
 
-struct gcov_reader
+class gcov_reader
 {
 	Analyser& analyser;
 	FunctionData::ptr data_;
 	std::map<int,int> annotation;
 	boost::program_options::variables_map options_;
+public:
 	gcov_reader(Analyser& a, boost::program_options::variables_map options = boost::program_options::variables_map())
 		: analyser(a)
 		, options_(options)
 	{
 	}
 	void open(const boost::filesystem::path& filename);
+private:
 	void tag_function (const char*, unsigned, unsigned);
 	void tag_blocks (const char*, unsigned, unsigned);
 	void tag_arcs (const char*, unsigned, unsigned);
@@ -51,7 +54,9 @@ struct gcov_reader
 	void tag_counters (const char*, unsigned, unsigned);
 	void tag_summary (const char*, unsigned, unsigned);
 	void process_graph();
-	void print_file(const std::string& filename);
+	void print_file(const std::string& filename, boost::function< std::string(int) > prefix);
+	std::string prefix_with_npath(int);
+	std::string prefix_with_block_number(int);
 };
 
 #endif

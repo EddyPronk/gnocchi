@@ -19,18 +19,13 @@ Boston, MA 02110-1301, USA.  */
 #ifndef ANALYSER_HPP_
 #define ANALYSER_HPP_
 
-#include <boost/graph/adjacency_list.hpp>
+#include <set>
+#include <vector>
+#include "graph.hpp"
 #include "reporter.hpp"
 #include "function_data.hpp"
-
-typedef boost::adjacency_list< 
-	boost::mapS, boost::vecS, boost::bidirectionalS,
-	boost::property<boost::vertex_color_t, boost::default_color_type,
-					boost::property<boost::vertex_degree_t, int,
-									boost::property<boost::vertex_in_degree_t, int,
-													boost::property<boost::vertex_out_degree_t, int> > > >
-	> Graph;
-//typedef boost::adjacency_list<> Graph;
+#include <boost/signal.hpp>
+#include "gcov_reader.hpp"
 
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::vertices_size_type size_type;
@@ -42,17 +37,17 @@ public:
 		: reporter_(r)
 	{
 	}
-	void process(std::map<int,int>& annotation,	FunctionData::ptr data);
-	void clear();
-	void add_edge(int src, int dest);
-	void calculate_npath(std::map<int,int>& annotation, FunctionData::ptr data);
-	void calculate_npath_2(FunctionData::ptr data);
+	void process(const gcov_reader&);
+	void calculate_npath(const gcov_reader&, const Graph&, foobar&);
+	void calculate_npath_2(const Graph&, foobar&);
 	void report(int /*npath_threshold*/);
-	void annotate_file(std::map<int,int>& annotation, FunctionData::ptr data, const std::string& filename, const std::vector<Vertex>&);
+
+    typedef boost::signal<void (const gcov_reader&, foobar&, std::vector<Vertex>)>  line_insert_signal_type;
+	line_insert_signal_type on_complexity_calculated;
 private:
 	reporter& reporter_;	
-	Graph graph_;	
-std::multimap<int, FunctionData::ptr> functions;
+	typedef std::set<foobar> function_index;
+	function_index functions;
 };
 
 #endif

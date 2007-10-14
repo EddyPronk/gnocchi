@@ -32,32 +32,23 @@ Boston, MA 02110-1301, USA.  */
 using namespace boost;
 using namespace std;
 
-void Analyser::add_edge(int src, int dest)
+void Analyser::calculate_npath_2(const Graph& g, foobar& f)
 {
-	boost::add_edge(src, dest, graph_);
-}
-
-void Analyser::clear()
-{
-	graph_.clear();
-}
-
-void Analyser::calculate_npath_2(FunctionData::ptr data)
-{
-	clear_vertex(0, graph_);
+	Graph graph(g);
+	clear_vertex(0, graph);
 	//remove_vertex(0, graph_);
 
 //  	string filename = data->name + string(".dot");
 //  	ofstream os(filename.c_str());
 //  	write_graphviz(os, graph_);
 
-	vector<Parent> parents(num_vertices(graph_));
-	vector<Vertex> complexity(num_vertices(graph_));
-	depth_first_search(graph_, visitor(npath_counter(
-										   parents,
-										   complexity,
-										   data->cyclomatic_complexity_e)));
-	data->npath_complexity_e = complexity[1];
+	vector<Parent> parents(num_vertices(graph));
+	vector<Vertex> complexity(num_vertices(graph));
+	depth_first_search(graph, visitor(npath_counter(
+										  parents,
+										  complexity,
+										  f.cyclomatic_complexity_e)));
+	f.npath_complexity_e = complexity[1];
 //  	for(int i = 0; i < complexity.size(); ++i)
 //  		cout << i << " " << complexity[i] << endl;
 }
@@ -106,62 +97,61 @@ void Analyser::print_file(FunctionData::ptr data, const std::string& filename, c
 }
 #endif
 
-void Analyser::annotate_file(std::map<int,int>& annotation, FunctionData::ptr data, const std::string& filename, const vector<Vertex>& complexity)
+void Analyser::calculate_npath(const gcov_reader& reader, const Graph& g, foobar& f)
 {
-	std::multimap<int,int>::iterator pos = data->block_map.begin();
-	
-	for(;pos != data->block_map.end(); ++pos)
-	{
-		if(annotation[pos->first] < complexity[pos->second])
-			annotation[pos->first] = complexity[pos->second];
-	}
-}
+	Graph graph(g);
+	clear_vertex(0, graph);
 
-void Analyser::calculate_npath(std::map<int,int>& annotation, FunctionData::ptr data)
-{
-	if(num_vertices(graph_) > 2)
+	if(num_vertices(graph) > 2)
 	{
-		clear_vertex(num_vertices(graph_) - 1, graph_);
+		clear_vertex(num_vertices(graph) - 1, graph);
 		//remove_vertex(num_vertices(graph_) - 1, graph_);
 	}
   
-	vector<Parent> parents(num_vertices(graph_));
-	vector<Vertex> complexity(num_vertices(graph_));
+	vector<Parent> parents(num_vertices(graph));
+	vector<Vertex> complexity(num_vertices(graph));
 			
-	depth_first_search(graph_, visitor(npath_counter(
-										   parents,
-										   complexity,
-										   data->cyclomatic_complexity)));
-	data->npath_complexity = complexity[1];
+	depth_first_search(graph, visitor(npath_counter(
+										  parents,
+										  complexity,
+										  f.cyclomatic_complexity)));
+	f.npath_complexity = complexity[1];
 
 //  	for(int i = 0; i < complexity.size(); ++i)
 //  		cout << i << " " << complexity[i] << endl;
 
- 	string filename = data->name + string(".dot");
- 	ofstream os(filename.c_str());
- 	write_graphviz(os, graph_);
+//  	string filename = data->name + string(".dot");
+//  	ofstream os(filename.c_str());
+//  	write_graphviz(os, graph_);
 
-	annotate_file(annotation, data, data->filename.string(), complexity);
+	//annotate_file(annotation, data, data->filename.string(), complexity);
+	on_complexity_calculated(reader, f, complexity);
 }
 
-void Analyser::process(	std::map<int,int>& annotation, FunctionData::ptr data)
+void Analyser::process(const gcov_reader& reader)
 {
-	if(num_vertices(graph_))
+//	cout << reader.function().name << endl;
+
+	foobar baz;
+	baz.function = reader.function();
+
+	if(num_vertices(reader.graph()))
 	{
-		calculate_npath_2(data);
-		calculate_npath(annotation, data);
-		functions.insert(std::make_pair(data->npath_complexity, data));
+		calculate_npath_2(reader.graph(), baz);
+		calculate_npath(reader, reader.graph(), baz);
+//		functions.insert(std::make_pair(data->npath_complexity, data));
+		functions.insert(baz);
 	}
 }
 
 void Analyser::report(int npath_threshold)
 {
-	std::map<int, FunctionData::ptr>::iterator pos = functions.begin();
-	std::map<int, FunctionData::ptr>::iterator end = functions.end();
+	function_index::iterator pos = functions.begin();
+	function_index::iterator end = functions.end();
 
 	for(; pos != end; ++pos)
 	{
-		if(pos->second->npath_complexity > npath_threshold)
-			reporter_.on_function(pos->second);
+		//	if(pos->npath_complexity > npath_threshold)
+			reporter_.on_function(*pos);
 	}
 }

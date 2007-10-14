@@ -28,23 +28,53 @@ Boston, MA 02110-1301, USA.  */
 struct FunctionData
 {
 	typedef boost::shared_ptr<FunctionData> ptr;
+
 	FunctionData()
 		: line_number(0)
-		, cyclomatic_complexity(0)
-		, npath_complexity(0)
-		, cyclomatic_complexity_e(0)
-		, npath_complexity_e(0)
 	{
-		std::cout << "FunctionData ctor" << std::endl;
 	}
 	std::string name;
 	boost::filesystem::path filename;
 	int line_number;
+};
+
+inline bool operator<(const FunctionData& lhs, const FunctionData& rhs)
+{
+	if (lhs.filename < rhs.filename) return true;
+	if (lhs.filename > rhs.filename) return false;
+
+	if (lhs.line_number < rhs.line_number) return true;
+	if (lhs.line_number > rhs.line_number) return false;
+	return false;
+}
+
+struct foobar
+{
+	foobar()
+		: cyclomatic_complexity(0)
+		, npath_complexity(0)
+		, cyclomatic_complexity_e(0)
+		, npath_complexity_e(0)
+	{
+	}
+	FunctionData function;
 	long long cyclomatic_complexity;
 	long long npath_complexity;
 	long long cyclomatic_complexity_e;
 	long long npath_complexity_e;
-	std::multimap<int,int> block_map;
 };
+
+inline bool operator<(const foobar& lhs, const foobar& rhs)
+{
+	if(lhs.npath_complexity < rhs.npath_complexity)	return true;
+	if(lhs.npath_complexity > rhs.npath_complexity)	return false;
+
+	if (lhs.function.filename < rhs.function.filename) return true;
+	if (lhs.function.filename > rhs.function.filename) return false;
+
+	if (lhs.function.line_number < rhs.function.line_number) return true;
+	if (lhs.function.line_number > rhs.function.line_number) return false;
+	return false;
+}
 
 #endif

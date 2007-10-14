@@ -48,6 +48,26 @@ struct Fixture
 	}
  };
 
+#include <boost/graph/graphviz.hpp>
+
+TEST(Fixture, no_renumber)
+{
+	add_edge(0, 1, g);
+	add_edge(1, 2, g);
+	add_edge(1, 3, g);
+	add_edge(2, 4, g);
+	add_edge(3, 4, g);
+
+	calc();
+	EQUAL(2, complexity[0]);
+
+	//clear_vertex(0, g);
+	//remove_vertex(0, g);
+
+  	write_graphviz(cout, g);
+}
+
+#if 1
 TEST(Fixture, empty)
 {
 	add_edge(1, 2, g); // fixme: fails if empty
@@ -96,3 +116,4 @@ TEST(Fixture, simple)
 	calc();
 	EQUAL(1, complexity[0]);
 }
+#endif

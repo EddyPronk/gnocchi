@@ -23,13 +23,6 @@ Boston, MA 02110-1301, USA.  */
 
 #include "gcov_reader.hpp"
 #include "analyser.hpp"
-#include <iostream>
-#include <iomanip>
-#include <stdexcept>
-#include <fstream>
-#include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
-#include <boost/bind.hpp>
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -71,6 +64,11 @@ static const tag_format_t tag_table[] =
   {0, NULL}
 };
 
+gcov_reader::gcov_reader(Analyser& a)
+	: analyser(a)
+{
+}
+
 void
 gcov_reader::tag_function (const char* /*filename*/, unsigned /*tag*/, unsigned length)
 {
@@ -83,15 +81,18 @@ gcov_reader::tag_function (const char* /*filename*/, unsigned /*tag*/, unsigned 
     {
       const char *name;
 
-	  analyser.process(annotation, data_);
-      name = gcov_read_string ();
-	  data_ = FunctionData::ptr(new FunctionData);
-	  data_->name = name;
-	  data_->line_number = 0; // hacky
-	  analyser.clear();
-	  //block_map.clear(); // hacky
+	  if(function_.get())
+		  analyser.process(*this);
 
-	  data_->filename = gcov_read_string ();
+      name = gcov_read_string ();
+	  function_ = FunctionData::ptr(new FunctionData);
+	  function_->name = name;
+	  function_->line_number = 0; // hacky
+
+	  graph_.clear();
+	  block_map_.clear(); // hacky
+
+	  function_->filename = gcov_read_string ();
       gcov_read_unsigned();
     }
 }
@@ -154,7 +155,7 @@ gcov_reader::tag_arcs (const char* filename,
 //			if(flags == 4)
 			{
 //				std::cout << blockno << " -> " << dst << std::endl;
-				analyser.add_edge(blockno, dst);
+				add_edge(blockno, dst, graph_);
 			}
 		}
     }
@@ -184,7 +185,7 @@ gcov_reader::tag_lines (const char* /*filename*/,
 					break;
 				// Detect functions with references to other source files.
 				filename = std::string(source), fs::native;
-#if 1
+#if 0
 				if(data_->filename != filename)
 				{
 					cout << "in: " << data_->name << " ";
@@ -201,11 +202,13 @@ gcov_reader::tag_lines (const char* /*filename*/,
 #endif
 
 #if 1
-				if(data_->filename == filename)
+				if(function_->filename == filename)
 				{
+					on_line_insert(lineno, blockno);
+					block_map_.insert(make_pair(lineno, blockno));
 //					if(block_map_.find(lineno) == block_map_.end())
 //					{
-						data_->block_map.insert(make_pair(lineno, blockno));
+					//data_->block_map.insert(make_pair(lineno, blockno));
 //					}
 // 					else
 // 					{
@@ -215,9 +218,9 @@ gcov_reader::tag_lines (const char* /*filename*/,
  				}
 #endif
 
- 				if(!data_->line_number)
+ 				if(!function_->line_number)
  				{
- 					data_->line_number = lineno;
+ 					function_->line_number = lineno;
 					//std::cout << "first_line " << first_line << std::endl;
  				}
 			}
@@ -298,11 +301,10 @@ std::string version_to_string(unsigned v)
 
 void gcov_reader::open(const boost::filesystem::path& path)
 {
-//	data_->block_map.clear(); // hacky
 	const char* filename(path.string().c_str());
 
-	if(options_.count("verbose"))
-		cout << "reading " << filename << endl;
+// 	if(options_.count("verbose"))
+// 		cout << "reading " << filename << endl;
 
 	unsigned tags[4];
 	unsigned depth = 0;
@@ -338,11 +340,11 @@ void gcov_reader::open(const boost::filesystem::path& path)
 // 		printf ("%s:%s:magic `%.4s':version `%.4s'%s\n", filename, type,
 // 				m, v, endianness < 0 ? " (swapped endianness)" : "");
 		
-		if (version != GCOV_VERSION and options_.count("verbose"))
-		{
-			cout << format("%1%:warning:current version is `%2%' expected `%3%'\n")
-				% filename % version_to_string(version) % version_to_string(GCOV_VERSION);
-		}
+// 		if (version != GCOV_VERSION and options_.count("verbose"))
+// 		{
+// 			cout << format("%1%:warning:current version is `%2%' expected `%3%'\n")
+// 				% filename % version_to_string(version) % version_to_string(GCOV_VERSION);
+// 		}
 	}
 
 	/* stamp */
@@ -443,61 +445,13 @@ void gcov_reader::open(const boost::filesystem::path& path)
 			break;
 		}
     }
-	analyser.process(annotation, data_);
-	if(options_.count("annotate-npath"))
-		print_file(filename, boost::bind(&gcov_reader::prefix_with_npath, this, _1));
 
-	if(options_.count("annotate-block"))
-		print_file(filename, boost::bind(&gcov_reader::prefix_with_block_number, this, _1));
+	analyser.process(*this);
+// 	if(options_.count("annotate-npath"))
+// 		print_file(filename, boost::bind(&gcov_reader::prefix_with_npath, this, _1));
+
+// 	if(options_.count("annotate-block"))
+// 		print_file(filename, boost::bind(&gcov_reader::prefix_with_block_number, this, _1));
 
 	gcov_close ();
 }
-
-std::string gcov_reader::prefix_with_npath(int lineno)
-{
-	if(annotation.find(lineno) != annotation.end())
-		return lexical_cast<std::string>(annotation.find(lineno)->second);
-	else
-		return "";
-}
-
-std::string gcov_reader::prefix_with_block_number(int lineno)
-{
-	string prefix;
-	std::multimap<int,int>::iterator pos = data_->block_map.lower_bound(lineno);
-	if(pos != data_->block_map.upper_bound(lineno))
-	{
-		prefix = lexical_cast<std::string>(pos->second);
-		++pos;
-	}
-	for(;pos != data_->block_map.upper_bound(lineno); ++pos)
-	{
-		prefix += "," + lexical_cast<std::string>(pos->second);
-	}
-	return prefix;
-}
-
-void gcov_reader::print_file(const std::string& filename, boost::function< std::string(int) > prefix)
-{
-	ifstream is(data_->filename.string().c_str());
-	ofstream os((data_->filename.string() + ".gcov").c_str());
-
-	os << "        -:    0:Source:" << data_->filename.string() << endl
-	   << "        -:    0:Graph:" << filename << endl;
-		// << "        -:    0:Data:before.gcda" << endl
-		// << "        -:    0:Runs:1" << endl
-		// << "        -:    0:Programs:1" << endl;
-	
-	assert(!is.fail());
-	int lineno = 1;
-	while(!is.eof())
- 	{
- 		char buffer[1024];
- 		is.getline(buffer, 1024);
-		
-		os << setw(9) << prefix(lineno) << ":" << setw(5) << right << lineno << ":"
-		   << buffer << endl;
- 		++lineno;
-	}
-}
-

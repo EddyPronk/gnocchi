@@ -16,14 +16,17 @@ along with GNU Emacs; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.  */
 
+#include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <stdexcept>
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/program_options.hpp>
-
+#include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 #include "gcov_reader.hpp"
 #include "analyser.hpp"
 #include "reporter.hpp"
@@ -41,17 +44,119 @@ extern "C"
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace std;
-
+using boost::lexical_cast;
 static void print_version (void);
+
+struct block_index
+{
+	typedef std::multimap<int,int> block_map_t;
+	block_map_t block_map_;
+	string filename_;
+
+	const string& source_filename()
+	{
+		filename_ = "foo.c";
+		return filename_;
+	}
+
+	void on_line_inserted(int lineno ,int blockno)
+	{
+		block_map_.insert(make_pair(lineno, blockno));
+	}
+
+	std::string prefix_with_block_number(int lineno)
+	{
+		string prefix;
+		std::multimap<int,int>::iterator pos = block_map_.lower_bound(lineno);
+		if(pos != block_map_.upper_bound(lineno))
+		{
+			prefix = lexical_cast<std::string>(pos->second);
+			++pos;
+		}
+		for(;pos != block_map_.upper_bound(lineno); ++pos)
+		{
+			prefix += "," + lexical_cast<std::string>(pos->second);
+		}
+		return prefix;
+	}
+};
+
+struct npath_annotator
+{
+	block_index index;
+	map<int,int> annotation;
+	string filename_;
+	npath_annotator(block_index& i) : index(i)
+	{
+	}
+
+	const string& source_filename() { return filename_; }
+	void annotate_file(const gcov_reader& reader, const foobar& f, const std::vector<Vertex>& complexity)
+	{
+		if(f.function.filename != "/home/epronk/gnocchi/trunk/gcov_reader.cpp")
+			return;
+
+		filename_ = reader.function().filename.string();
+		std::multimap<int,int>::const_iterator pos = reader.block_map().begin();
+	
+		for(;pos != reader.block_map().end(); ++pos)
+		{
+			if(annotation[pos->first] < complexity[pos->second])
+			{
+				annotation[pos->first] = complexity[pos->second];
+			}
+		}
+	}
+	std::string prefix_with_npath(int lineno)
+	{
+		if(annotation.find(lineno) != annotation.end())
+			return lexical_cast<std::string>(annotation.find(lineno)->second);
+		else
+			return "";
+	}
+};
+
+void print_file(const std::string& filename, boost::function< std::string(int) > prefix)
+{
+	ifstream is(filename.c_str());
+	ofstream os((filename + ".gcov").c_str());
+
+	os << "        -:    0:Source:" << filename << endl;
+
+	int lineno = 1;
+	while(!is.eof())
+ 	{
+ 		char buffer[1024];
+ 		is.getline(buffer, 1024);
+		
+		os << setw(9) << prefix(lineno) << ":" << setw(5) << right << lineno << ":"
+		   << buffer << endl;
+ 		++lineno;
+	}
+}
+
 
 class file_processor : public reporter
 {
+	Analyser analyser_;
+
 	typedef vector<fs::path> filelist_t;
 	typedef map<fs::path, fs::path> filemap_t;
 
-	virtual void on_function(FunctionData::ptr param)
+	filelist_t filelist;
+	filemap_t map;
+
+public:
+	file_processor()
+		: analyser_(*this)
 	{
- 		filemap_t::iterator found = map.find(param->filename);
+	}
+
+private:
+
+	virtual void on_function(const foobar& param)
+	{
+ 		filemap_t::iterator found = map.find(param.function.filename);
 		
  		if (found != map.end())
  		{
@@ -59,36 +164,25 @@ class file_processor : public reporter
  		}
 		else
 		{
-			cout << param->filename.string();
+			cout << param.function.filename.string();
 		}
 		
-#if 0
-		cout  << ":" << param->line_number << ":"
-			  << " mccabe=" << param->cyclomatic_complexity
-			  << " npath=" << param->npath_complexity 
-			  << " mccabe=" << param->cyclomatic_complexity_e
-			  << " npath=" << param->npath_complexity_e 
-			  << endl;
-#else
-		long long npath_delta = param->npath_complexity_e - param->npath_complexity;
-		assert(npath_delta >= 0);
-		int cyclomatic_delta = param->cyclomatic_complexity_e - param->cyclomatic_complexity;
-		assert(cyclomatic_delta >= 0);
+		long long npath_delta = param.npath_complexity_e - param.npath_complexity;
+		int cyclomatic_delta = param.cyclomatic_complexity_e - param.cyclomatic_complexity;
 		
-		cout  << ":" << param->line_number << ":"
-			  << " mccabe=" << param->cyclomatic_complexity;
+		cout  << ":" << param.function.line_number << ":"
+			  << " mccabe=" << param.cyclomatic_complexity;
 		if(cyclomatic_delta > 0)	
 			cout << "(+" << cyclomatic_delta << ")";
-		cout << " npath=" << param->npath_complexity;
+		cout << " npath=" << param.npath_complexity;
 		if(npath_delta > 0)	
 			cout << "(+" << npath_delta << ") ";
 		cout << endl;
-#endif
 
-}
+		assert(npath_delta >= 0);
+		assert(cyclomatic_delta >= 0);
+	}
 
-	filelist_t filelist;
-	filemap_t map;
 public:
 	void find_file( const fs::path& dir_path)
 	{
@@ -155,20 +249,72 @@ public:
 			filelist.push_back(path);
 
 	}
-	void process(const vector<string>& v)
+
+	int filelist_size()
 	{
-		for_each(v.begin(), v.end(), boost::bind(&file_processor::process_file, this, _1));
+		return filelist.size();
+	}
+	void annotate_with_block_numbers()
+	{
+		if(filelist.size() == 1)
+		{
+			string filename = (filelist.begin())->string();
+
+			gcov_reader reader(analyser_);
+			block_index index;
+			reader.on_line_insert.connect(boost::bind(&block_index::on_line_inserted, &index, _1, _2));
+			reader.open(filename);
+
+			print_file(index.source_filename(), boost::bind(&block_index::prefix_with_block_number, &index, _1));
+		}
+		else
+		{
+			// error
+		}
 	}
 
-	void invoke(boost::function<void(fs::path)> f)
+	void annotate_with_npath()
 	{
-		for_each(filelist.begin(), filelist.end(), f);
+		if(filelist.size() == 1)
+		{
+			string filename = (filelist.begin())->string();
+
+			gcov_reader reader(analyser_);
+			block_index index;
+			npath_annotator annotator(index);
+			analyser_.on_complexity_calculated.connect(boost::bind(&npath_annotator::annotate_file, &annotator, _1, _2, _3));
+			reader.open(filename);
+			print_file(annotator.source_filename(), boost::bind(&npath_annotator::prefix_with_npath, &annotator, _1));
+		}
+		else
+		{
+			// error
+		}
+	}
+
+	void build_filelist(const vector<string>& files)
+	{
+		BOOST_FOREACH(string s, files)
+		{
+			process_file(s);
+		}
+	}
+
+	void report()
+	{
+		BOOST_FOREACH(fs::path filename, filelist)
+		{
+			gcov_reader file(analyser_);
+			file.open(filename);
+		}
+
+		analyser_.report(1); // threshold);
 	}
 };
 
+
 int main(int ac, char* av[])
 {
-	// FIXME unlock_std_streams ();
 	fs::path::default_name_check( fs::native );
 
 	try
@@ -220,14 +366,11 @@ int main(int ac, char* av[])
 			return 0;
 		}
 
-		//report_printer r;
 		file_processor processor;
-		Analyser a(processor);
-		gcov_reader reader(a, options);
 
 		if (options.count("input-file"))
 		{
-			processor.process(options["input-file"].as< vector<string> >());
+			processor.build_filelist(options["input-file"].as< vector<string> >());
 		}
 		else
 		{
@@ -235,9 +378,18 @@ int main(int ac, char* av[])
 			return 1;
 		}
 
-		processor.invoke(boost::bind(&gcov_reader::open, &reader, _1));
-
-		a.report(threshold);
+		if(options.count("annotate-block"))
+		{
+			processor.annotate_with_block_numbers();
+		}
+		else if(options.count("annotate-npath"))
+		{
+			processor.annotate_with_npath();
+		}
+		else
+		{
+			processor.report();
+		}
 	}
 	catch(exception& e)
 	{

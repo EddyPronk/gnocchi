@@ -29,17 +29,17 @@ struct fixture : public reporter
 		: error(false)
 	{
 	}
-	void on_function(FunctionData::ptr param)
+	void on_function(const foobar& param)
 	{
-		std::cout << "on_function " << param->name << std::endl;
-		actual_.insert(std::make_pair(param->name, param));
+		std::cout << "on_function " << param.function.name << std::endl;
+		actual_.insert(std::make_pair(param.function.name, param));
 	}
 	void add_test(int c, int npath, int npathpp, const::std::string& fn)
 	{
-		FunctionData::ptr data(new FunctionData);
-		data->cyclomatic_complexity = c;
-		data->npath_complexity = npath;
-		data->npath_complexity_e = npathpp;
+		foobar data;
+		data.cyclomatic_complexity = c;
+		data.npath_complexity = npath;
+		data.npath_complexity_e = npathpp;
 		expected_.insert(std::make_pair(fn, data));
 	}
 	void check(const std::string& name, int expected, int actual)
@@ -68,13 +68,13 @@ struct fixture : public reporter
 			{
 				std::cout << "check: " << pos->first << std::endl;
 				//check("cyclomatic_complexity", pos->second->cyclomatic_complexity, actual->second->cyclomatic_complexity);
-				check("npath_complexity", pos->second->npath_complexity, actual->second->npath_complexity);
+				check("npath_complexity", pos->second.npath_complexity, actual->second.npath_complexity);
 				//check("npath_complexity_2", pos->second->npath_complexity_2, actual->second->npath_complexity_2);
 			}
 		}
 		return error;
 	}
-	typedef std::map<std::string, FunctionData::ptr> container;
+	typedef std::map<std::string, foobar> container;
 	container actual_;
 	container expected_;
 };
@@ -97,7 +97,8 @@ int main()
 	Analyser a(f);
 	gcov_reader reader(a);
 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
-	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
+// 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
+// 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
 
 	a.report(0);
 	bool error = f.check();

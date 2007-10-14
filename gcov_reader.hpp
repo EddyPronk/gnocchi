@@ -28,23 +28,30 @@ Boston, MA 02110-1301, USA.  */
 #include "function_data.hpp"
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/program_options.hpp>
+#include <boost/signal.hpp>
 #include <map>
+#include "graph.hpp"
 
 class Analyser;
 
+// struct context
+// {
+// 	Graph graph;
+// 	std::map<int,int> block_map;
+// 	FunctionData::ptr function;
+// };
+
 class gcov_reader
 {
-	Analyser& analyser;
-	FunctionData::ptr data_;
-	std::map<int,int> annotation;
-	boost::program_options::variables_map options_;
 public:
-	gcov_reader(Analyser& a, boost::program_options::variables_map options = boost::program_options::variables_map())
-		: analyser(a)
-		, options_(options)
-	{
-	}
+	typedef std::multimap<int,int> block_map_t;
+ 	const FunctionData function() const { return *function_; }
+ 	const Graph& graph() const { return graph_; }
+ 	const block_map_t& block_map() const { return block_map_; }
+	
+    typedef boost::signal<void (int, int)>  line_insert_signal_type;
+	line_insert_signal_type on_line_insert;
+	gcov_reader(Analyser& a);
 	void open(const boost::filesystem::path& filename);
 private:
 	void tag_function (const char*, unsigned, unsigned);
@@ -57,6 +64,12 @@ private:
 	void print_file(const std::string& filename, boost::function< std::string(int) > prefix);
 	std::string prefix_with_npath(int);
 	std::string prefix_with_block_number(int);
+
+	Analyser& analyser;
+ 	FunctionData::ptr function_;
+ 	Graph graph_;
+//	typedef std::map<int,int> block_map_t;
+ 	block_map_t block_map_;
 };
 
 #endif

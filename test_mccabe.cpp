@@ -20,16 +20,16 @@ Boston, MA 02110-1301, USA.  */
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+#include "graph.hpp"
 #include "reporter.hpp"
 #include "analyser.hpp"
 
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/visitors.hpp>
 #include <boost/graph/graph_utility.hpp>
-#include <boost/graph/reverse_graph.hpp>
+//#include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/connected_components.hpp>
+//#include <boost/graph/connected_components.hpp>
 
 using namespace boost;
 using boost::bind;
@@ -38,14 +38,13 @@ using boost::bind;
 
 class test : public reporter
 {
-    adjacency_list <vecS, vecS, undirectedS> G;
-	//GraphvizDigraph G;
 public:
 	Analyser analyzer_;
+	Graph G;
 	test() : analyzer_(*this)
 	{
 	}
-	virtual void on_function(FunctionData::ptr param)
+	virtual void on_function(const foobar& param)
 	{
 		std::cout << "on_function" << std::endl;
 	}
@@ -62,40 +61,24 @@ public:
  		call(bind(&test::page_311_fig_2, this));
 	}
 
-	int connected()
-	{
-#if 0
-		typedef graph_traits<GraphvizGraph>::vertex_descriptor Vertex;
-		
-		std::vector<int> component(num_vertices(G)), discover_time(num_vertices(G));
-		std::vector<default_color_type> color(num_vertices(G));
-		std::vector<Vertex> root(num_vertices(G));
-		int num = strong_components(G, &component[0], 
-									root_map(&root[0]).
-									color_map(&color[0]).
-									discover_time_map(&discover_time[0]));
-#endif
-		std::vector<int> component(num_vertices(G));
-		int num = connected_components(G, &component[0]);
-		return num;
-	}
 private:
 	void call(boost::function<int()> f)
 	{
-		FunctionData::ptr data(new FunctionData);
+		gcov_reader reader(analyzer_);
+		foobar data;
 //		std::cout << data->cyclomatic_complexity << std::endl;
-		analyzer_.clear();
+		//analyzer_.clear();
 		G.clear(); // = GraphvizDigraph();
 		//analyzer_.set_data(data);
 		int expected = f();
 //		analyzer_.add_edge(boost::num_vertices(analyzer_.graph_) - 1, 0); // add extra edge 
 		//std::cout << "connected" << connected() << std::endl;
-		std::map<int,int> annotation;
-		analyzer_.calculate_npath(annotation, data);
-		if(data->cyclomatic_complexity != expected)
+		//std::map<int,int> annotation;
+		analyzer_.calculate_npath(reader, G, data);
+		if(data.cyclomatic_complexity != expected)
 		{
 			std::cout << "fail" << std::endl;
-			std::cout << data->cyclomatic_complexity << " != " << expected << std::endl;
+			std::cout << data.cyclomatic_complexity << " != " << expected << std::endl;
 		}
 		else
 			std::cout << "ok" << std::endl;
@@ -103,7 +86,7 @@ private:
 	}
 	void add_edge(int from, int to)
 	{
-		analyzer_.add_edge(from - 1, to - 1);
+		//analyzer_.add_edge(from - 1, to - 1);
 		boost::add_edge(from - 1, to - 1, G);
 	}
 

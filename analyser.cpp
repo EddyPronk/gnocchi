@@ -43,7 +43,7 @@ void Analyser::calculate_npath_2(const Graph& g, data_model& f)
 //  	write_graphviz(os, graph_);
 
 	vector<Parent> parents(num_vertices(graph));
-	vector<long long> complexity(num_vertices(graph));
+	vector<CountType> complexity(num_vertices(graph));
 	depth_first_search(graph, visitor(npath_counter(
 										  parents,
 										  complexity)));
@@ -74,7 +74,7 @@ void Analyser::print_file(FunctionData::ptr data, const std::string& filename, c
  		char buffer[1024];
  		is.getline(buffer, 1024);
 		std::multimap<int,int>::iterator pos = data->block_map.lower_bound(lineno);
-		unsigned int npath = 0;
+		int npath = 0;
 		bool has_prefix = false;
 		if(pos != data->block_map.upper_bound(lineno))
 		{
@@ -110,7 +110,7 @@ void Analyser::calculate_npath(const gcov_reader& reader, const Graph& g, data_m
 	}
   
 	vector<Parent> parents(num_vertices(graph));
-	vector<long long> complexity(num_vertices(graph));
+	vector<CountType> complexity(num_vertices(graph));
 			
 	depth_first_search(graph, visitor(npath_counter(
 										  parents,
@@ -121,9 +121,9 @@ void Analyser::calculate_npath(const gcov_reader& reader, const Graph& g, data_m
 //  	for(int i = 0; i < complexity.size(); ++i)
 //  		cout << i << " " << complexity[i] << endl;
 
-//  	string filename = data->name + string(".dot");
-//  	ofstream os(filename.c_str());
-//  	write_graphviz(os, graph_);
+  	string filename = f.function.name + string(".dot");
+  	ofstream os(filename.c_str());
+  	write_graphviz(os, graph);
 
 	//annotate_file(annotation, data, data->filename.string(), complexity);
 	on_complexity_calculated(reader, f, complexity);

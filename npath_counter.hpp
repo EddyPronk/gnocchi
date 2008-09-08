@@ -21,6 +21,8 @@ Boston, MA 02110-1301, USA.  */
 
 #include <boost/graph/depth_first_search.hpp>
 
+typedef long CountType;
+
 struct Parent
 {
 	Parent()
@@ -47,7 +49,7 @@ struct Parent
 class npath_counter : public boost::dfs_visitor<>
 {
 public:
-    npath_counter(std::vector<Parent>& pp, std::vector<long long>& qq)
+    npath_counter(std::vector<Parent>& pp, std::vector<CountType>& qq)
 		: parent(pp)
 		, complexity(qq)
 		, end_state(parent.size() - 1)
@@ -64,7 +66,7 @@ public:
 	{
 		parent[target(e, g)].set(source(e, g));
 		++edges;
-		//std::cout << "edges[" << edges << "]" << std::endl;
+		std::cout << "edges[" << edges << "]" << std::endl;
     }
     template <class Edge, class Graph>
     void back_edge(Edge e, const Graph& g)
@@ -72,16 +74,16 @@ public:
 		complexity[source(e, g)] = 1;
 		parent[target(e, g)].set(source(e, g));
 		++edges;
-		//	std::cout << "edges[" << edges << "]" << std::endl;
+		std::cout << "edges[" << edges << "]" << std::endl;
     }
     template <class Edge, class Graph>
     void forward_or_cross_edge(Edge e, const Graph& g)
 	{
-		//std::cout << "C " << complexity[source(e, g)] << " + " << complexity[target(e, g)] << " = ";
+		std::cout << "C " << complexity[source(e, g)] << " + " << complexity[target(e, g)] << " = ";
 		complexity[source(e, g)] += complexity[target(e, g)];
-		//std::cout << complexity[source(e, g)] << std::endl;
+		std::cout << complexity[source(e, g)] << std::endl;
 		++edges;
-//		std::cout << "edges[" << edges << "]" << std::endl;
+		std::cout << "edges[" << edges << "]" << std::endl;
     }
     template <class Vertex, class Graph>
     void finish_vertex(Vertex u, const Graph&)
@@ -100,15 +102,15 @@ public:
 		if(u != 0)
 			if(parent[u].defined_)
 			{
-				//	std::cout << "C " << complexity[parent[u]] << " + " << complexity[u] << " = ";
+				std::cout << "C " << complexity[parent[u]] << " + " << complexity[u] << " = ";
 				complexity[parent[u]] += complexity[u];
-				//std::cout << complexity[parent[u]] << std::endl;
+				std::cout << complexity[parent[u]] << std::endl;
 			}
     }
 private:
 	std::vector<Parent>& parent;
 	//std::vector<Vertex>& complexity;
-	std::vector<long long>& complexity;
+	std::vector<CountType>& complexity;
 	Vertex end_state;
 	int edges;
 	int vertices;

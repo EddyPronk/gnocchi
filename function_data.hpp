@@ -58,10 +58,10 @@ struct data_model
 	{
 	}
 	FunctionData function;
-	long long cyclomatic_complexity;
-	long long npath_complexity;
-	long long cyclomatic_complexity_e;
-	long long npath_complexity_e;
+	long cyclomatic_complexity;
+	long npath_complexity;
+	long cyclomatic_complexity_e;
+	long npath_complexity_e;
 };
 
 inline bool operator<(const data_model& lhs, const data_model& rhs)

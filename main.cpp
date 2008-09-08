@@ -30,6 +30,7 @@ Boston, MA 02110-1301, USA.  */
 #include "gcov_reader.hpp"
 #include "analyser.hpp"
 #include "reporter.hpp"
+#include "npath_counter.hpp"
 
 extern "C"
 {
@@ -91,7 +92,7 @@ struct npath_annotator
 	}
 
 	const string& source_filename() { return filename_; }
-	void annotate_file(const gcov_reader& reader, const data_model& f, const std::vector<long long>& complexity)
+	void annotate_file(const gcov_reader& reader, const data_model& f, const std::vector<long>& complexity)
 	{
 		if(f.function.filename != "/home/epronk/gnocchi/trunk/gcov_reader.cpp")
 			return;
@@ -167,7 +168,7 @@ private:
 			cout << param.function.filename.string();
 		}
 		
-		long long npath_delta = param.npath_complexity_e - param.npath_complexity;
+		CountType npath_delta = param.npath_complexity_e - param.npath_complexity;
 		int cyclomatic_delta = param.cyclomatic_complexity_e - param.cyclomatic_complexity;
 		
 		cout  << ":" << param.function.line_number << ":"

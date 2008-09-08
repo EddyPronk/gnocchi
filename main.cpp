@@ -144,7 +144,7 @@ class file_processor : public reporter
 	typedef map<fs::path, fs::path> filemap_t;
 
 	filelist_t filelist;
-	filemap_t map;
+	filemap_t filemap;
 
 public:
 	file_processor()
@@ -156,9 +156,9 @@ private:
 
 	virtual void on_function(const foobar& param)
 	{
- 		filemap_t::iterator found = map.find(param.function.filename);
+ 		filemap_t::iterator found = filemap.find(param.function.filename);
 		
- 		if (found != map.end())
+ 		if (found != filemap.end())
  		{
 			cout << found->second.string();
  		}
@@ -205,7 +205,7 @@ public:
 //					std::cout << itr->string() << " " << itr->leaf() << std::endl;
 					try
 					{
-						map[itr->leaf()] = *itr;
+						filemap[itr->leaf()] = *itr;
 					}
 					catch(const std::exception& e)
 					{

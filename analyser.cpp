@@ -43,12 +43,13 @@ void Analyser::calculate_npath_2(const Graph& g, foobar& f)
 //  	write_graphviz(os, graph_);
 
 	vector<Parent> parents(num_vertices(graph));
-	vector<Vertex> complexity(num_vertices(graph));
+	vector<long long> complexity(num_vertices(graph));
 	depth_first_search(graph, visitor(npath_counter(
 										  parents,
-										  complexity,
-										  f.cyclomatic_complexity_e)));
+										  complexity)));
+										  ///f.cyclomatic_complexity_e)));
 	f.npath_complexity_e = complexity[1];
+	f.cyclomatic_complexity_e = num_edges(graph) - num_vertices(graph) + 2;
 //  	for(int i = 0; i < complexity.size(); ++i)
 //  		cout << i << " " << complexity[i] << endl;
 }
@@ -109,12 +110,12 @@ void Analyser::calculate_npath(const gcov_reader& reader, const Graph& g, foobar
 	}
   
 	vector<Parent> parents(num_vertices(graph));
-	vector<Vertex> complexity(num_vertices(graph));
+	vector<long long> complexity(num_vertices(graph));
 			
 	depth_first_search(graph, visitor(npath_counter(
 										  parents,
-										  complexity,
-										  f.cyclomatic_complexity)));
+										  complexity)));
+	f.cyclomatic_complexity = num_edges(graph) - num_vertices(graph) + 2;
 	f.npath_complexity = complexity[1];
 
 //  	for(int i = 0; i < complexity.size(); ++i)

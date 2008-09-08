@@ -98,7 +98,7 @@ gcov_reader::tag_function (const char* /*filename*/, unsigned /*tag*/, unsigned 
 }
 
 void
-gcov_reader::tag_blocks (const char* filename,
+gcov_reader::tag_blocks (const char* /*filename*/,
 						 unsigned /*tag*/, unsigned length)
 {
 	unsigned n_blocks = GCOV_TAG_BLOCKS_NUM (length);
@@ -125,7 +125,7 @@ gcov_reader::tag_blocks (const char* filename,
 }
 
 void
-gcov_reader::tag_arcs (const char* filename,
+gcov_reader::tag_arcs (const char* /*filename*/,
 					   unsigned /*tag*/, unsigned length)
 {
 //	std::cout << "tag_arcs start" << std::endl;
@@ -184,7 +184,7 @@ gcov_reader::tag_lines (const char* /*filename*/,
 				if (!source)
 					break;
 				// Detect functions with references to other source files.
-				filename = std::string(source), fs::native;
+				filename = std::string(source); //, fs::native;
 #if 0
 				if(data_->filename != filename)
 				{

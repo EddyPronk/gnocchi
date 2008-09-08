@@ -91,7 +91,7 @@ struct npath_annotator
 	}
 
 	const string& source_filename() { return filename_; }
-	void annotate_file(const gcov_reader& reader, const foobar& f, const std::vector<Vertex>& complexity)
+	void annotate_file(const gcov_reader& reader, const foobar& f, const std::vector<long long>& complexity)
 	{
 		if(f.function.filename != "/home/epronk/gnocchi/trunk/gcov_reader.cpp")
 			return;
@@ -179,7 +179,13 @@ private:
 			cout << "(+" << npath_delta << ") ";
 		cout << endl;
 
-		assert(npath_delta >= 0);
+		//assert(npath_delta >= 0);
+		if (npath_delta < 0)
+		{
+			cout << "overflow" << endl;
+			cout << param.npath_complexity_e << endl;
+			cout << param.npath_complexity << endl;
+		}
 		assert(cyclomatic_delta >= 0);
 	}
 

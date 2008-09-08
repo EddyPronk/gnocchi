@@ -13,6 +13,8 @@
 #endif
 
 #include <cmath>
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -30,7 +32,7 @@ std::string demangle()
   size_t sz;
   int status;
   char* ptr = abi::__cxa_demangle(typeid(T).name(), 0, &sz, &status);
-  std::string name(ptr ? ptr : "", ptr ? strlen(ptr) : 0);
+  std::string name(ptr ? ptr : "", ptr ? std::strlen(ptr) : 0);
   if(ptr){ free(ptr); }
   std::string::size_type pos = name.rfind("::");
   if(pos != std::string::npos)

@@ -42,7 +42,7 @@ public:
 	void calculate_npath_2(const Graph&, foobar&);
 	void report(int /*npath_threshold*/);
 
-    typedef boost::signal<void (const gcov_reader&, foobar&, std::vector<Vertex>)>  line_insert_signal_type;
+    typedef boost::signal<void (const gcov_reader&, foobar&, std::vector<long long>)>  line_insert_signal_type;
 	line_insert_signal_type on_complexity_calculated;
 private:
 	reporter& reporter_;	

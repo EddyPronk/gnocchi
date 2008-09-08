@@ -18,7 +18,10 @@ Boston, MA 02110-1301, USA.  */
 
 #include <string>
 
-std::string trimString(const std::string&);
+std::string trimString(const std::string& s)
+{
+	return s;
+}
 
 class RefactoredNameFormatter
 {

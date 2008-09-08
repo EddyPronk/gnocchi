@@ -35,4 +35,4 @@ gnocchi_SOURCES = \
 	npath_counter.hpp \
 	reporter.hpp
 
-gnocchi_LDADD = -lboost_filesystem -lboost_program_options
+gnocchi_LDADD = -lboost_filesystem -lboost_program_options -lboost_signals

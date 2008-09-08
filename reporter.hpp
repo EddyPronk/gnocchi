@@ -25,7 +25,7 @@ class reporter
 {
 public:
 	virtual ~reporter() {}
-	virtual void on_function(const foobar&) = 0;
+	virtual void on_function(const data_model&) = 0;
 };
 
 #endif

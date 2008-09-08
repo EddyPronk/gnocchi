@@ -44,7 +44,7 @@ public:
 	test() : analyzer_(*this)
 	{
 	}
-	virtual void on_function(const foobar& param)
+	virtual void on_function(const data_model& param)
 	{
 		std::cout << "on_function" << std::endl;
 	}
@@ -65,7 +65,7 @@ private:
 	void call(boost::function<int()> f)
 	{
 		gcov_reader reader(analyzer_);
-		foobar data;
+		data_model data;
 //		std::cout << data->cyclomatic_complexity << std::endl;
 		//analyzer_.clear();
 		G.clear(); // = GraphvizDigraph();

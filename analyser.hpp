@@ -38,15 +38,15 @@ public:
 	{
 	}
 	void process(const gcov_reader&);
-	void calculate_npath(const gcov_reader&, const Graph&, foobar&);
-	void calculate_npath_2(const Graph&, foobar&);
+	void calculate_npath(const gcov_reader&, const Graph&, data_model&);
+	void calculate_npath_2(const Graph&, data_model&);
 	void report(int /*npath_threshold*/);
 
-    typedef boost::signal<void (const gcov_reader&, foobar&, std::vector<long long>)>  line_insert_signal_type;
+    typedef boost::signal<void (const gcov_reader&, data_model&, std::vector<long long>)>  line_insert_signal_type;
 	line_insert_signal_type on_complexity_calculated;
 private:
 	reporter& reporter_;	
-	typedef std::set<foobar> function_index;
+	typedef std::set<data_model> function_index;
 	function_index functions;
 };
 

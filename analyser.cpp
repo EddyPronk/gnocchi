@@ -32,7 +32,7 @@ Boston, MA 02110-1301, USA.  */
 using namespace boost;
 using namespace std;
 
-void Analyser::calculate_npath_2(const Graph& g, foobar& f)
+void Analyser::calculate_npath_2(const Graph& g, data_model& f)
 {
 	Graph graph(g);
 	clear_vertex(0, graph);
@@ -98,7 +98,7 @@ void Analyser::print_file(FunctionData::ptr data, const std::string& filename, c
 }
 #endif
 
-void Analyser::calculate_npath(const gcov_reader& reader, const Graph& g, foobar& f)
+void Analyser::calculate_npath(const gcov_reader& reader, const Graph& g, data_model& f)
 {
 	Graph graph(g);
 	clear_vertex(0, graph);
@@ -133,7 +133,7 @@ void Analyser::process(const gcov_reader& reader)
 {
 //	cout << reader.function().name << endl;
 
-	foobar baz;
+	data_model baz;
 	baz.function = reader.function();
 
 	if(num_vertices(reader.graph()))

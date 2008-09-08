@@ -29,14 +29,14 @@ struct fixture : public reporter
 		: error(false)
 	{
 	}
-	void on_function(const foobar& param)
+	void on_function(const data_model& param)
 	{
 		std::cout << "on_function " << param.function.name << std::endl;
 		actual_.insert(std::make_pair(param.function.name, param));
 	}
 	void add_test(int c, int npath, int npathpp, const::std::string& fn)
 	{
-		foobar data;
+		data_model data;
 		data.cyclomatic_complexity = c;
 		data.npath_complexity = npath;
 		data.npath_complexity_e = npathpp;
@@ -74,7 +74,7 @@ struct fixture : public reporter
 		}
 		return error;
 	}
-	typedef std::map<std::string, foobar> container;
+	typedef std::map<std::string, data_model> container;
 	container actual_;
 	container expected_;
 };

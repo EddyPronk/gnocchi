@@ -91,7 +91,7 @@ struct npath_annotator
 	}
 
 	const string& source_filename() { return filename_; }
-	void annotate_file(const gcov_reader& reader, const foobar& f, const std::vector<long long>& complexity)
+	void annotate_file(const gcov_reader& reader, const data_model& f, const std::vector<long long>& complexity)
 	{
 		if(f.function.filename != "/home/epronk/gnocchi/trunk/gcov_reader.cpp")
 			return;
@@ -154,7 +154,7 @@ public:
 
 private:
 
-	virtual void on_function(const foobar& param)
+	virtual void on_function(const data_model& param)
 	{
  		filemap_t::iterator found = filemap.find(param.function.filename);
 		

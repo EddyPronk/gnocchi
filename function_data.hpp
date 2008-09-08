@@ -48,9 +48,9 @@ inline bool operator<(const FunctionData& lhs, const FunctionData& rhs)
 	return false;
 }
 
-struct foobar
+struct data_model
 {
-	foobar()
+	data_model()
 		: cyclomatic_complexity(0)
 		, npath_complexity(0)
 		, cyclomatic_complexity_e(0)
@@ -64,7 +64,7 @@ struct foobar
 	long long npath_complexity_e;
 };
 
-inline bool operator<(const foobar& lhs, const foobar& rhs)
+inline bool operator<(const data_model& lhs, const data_model& rhs)
 {
 	if(lhs.npath_complexity < rhs.npath_complexity)	return true;
 	if(lhs.npath_complexity > rhs.npath_complexity)	return false;

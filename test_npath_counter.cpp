@@ -25,6 +25,8 @@ Boston, MA 02110-1301, USA.  */
 #include "npath_counter.hpp"
 
 #include <vector>
+#include <boost/graph/graphviz.hpp>
+
 
 using namespace std;
 
@@ -32,7 +34,7 @@ struct Fixture
 {
 	Graph g;
 	vector<Parent> parents;
-	vector<Vertex> complexity;
+	vector<CountType> complexity;
 
 	void calc ()
 	{
@@ -43,13 +45,11 @@ struct Fixture
 		depth_first_search(g, visitor(npath_counter(
 											   parents,
 											   complexity
-											   ///cyclomatic_complexity
+											   //cyclomatic_complexity
 											   )));
 		cyclomatic_complexity = 1;
 	}
  };
-
-#include <boost/graph/graphviz.hpp>
 
 TEST(Fixture, no_renumber)
 {

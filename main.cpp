@@ -195,7 +195,7 @@ public:
 	{
 		if ( !fs::exists( dir_path ) )
 		{
-			cout << "doesn't exist " << dir_path.native_directory_string() << endl;
+			cout << "doesn't exist " << dir_path << endl;
 			return;
 		}
 
@@ -209,10 +209,9 @@ public:
 					itr != end_itr;
 					++itr )
 				{
-//					std::cout << itr->string() << " " << itr->leaf() << std::endl;
 					try
 					{
-						filemap[itr->leaf()] = *itr;
+						filemap[itr->path().leaf()] = *itr;
 					}
 					catch(const std::exception& e)
 					{
@@ -246,7 +245,7 @@ public:
 	{
 		if (!fs::exists(path))
 		{
-			cout << "doesn't exist " << path.native_directory_string() << endl;
+			cout << "doesn't exist " << path << endl;
 			return;
 		}
 		
@@ -322,7 +321,7 @@ public:
 
 int main(int ac, char* av[])
 {
-	fs::path::default_name_check( fs::native );
+	//fs::path::default_name_check( fs::native );
 
 	try
 	{

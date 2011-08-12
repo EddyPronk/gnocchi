@@ -96,7 +96,7 @@ int main()
 
 	Analyser a(f);
 	gcov_reader reader(a);
-	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
+	reader.open("./CMakeFiles/test_input.dir/test_input.c.gcno");
 // 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input.dir/test_input.gcno");
 // 	reader.open("/home/epronk/gnocchi/trunk/CMakeFiles/test_input_2.dir/test_input_2.gcno");
 

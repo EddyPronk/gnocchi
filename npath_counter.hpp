@@ -66,7 +66,7 @@ public:
 	{
 		parent[target(e, g)].set(source(e, g));
 		++edges;
-		std::cout << "edges[" << edges << "]" << std::endl;
+		//std::cout << "edges[" << edges << "]" << std::endl;
     }
     template <class Edge, class Graph>
     void back_edge(Edge e, const Graph& g)
@@ -74,16 +74,16 @@ public:
 		complexity[source(e, g)] = 1;
 		parent[target(e, g)].set(source(e, g));
 		++edges;
-		std::cout << "edges[" << edges << "]" << std::endl;
+		//std::cout << "edges[" << edges << "]" << std::endl;
     }
     template <class Edge, class Graph>
     void forward_or_cross_edge(Edge e, const Graph& g)
 	{
-		std::cout << "C " << complexity[source(e, g)] << " + " << complexity[target(e, g)] << " = ";
+		//std::cout << "C " << complexity[source(e, g)] << " + " << complexity[target(e, g)] << " = ";
 		complexity[source(e, g)] += complexity[target(e, g)];
-		std::cout << complexity[source(e, g)] << std::endl;
+		//std::cout << complexity[source(e, g)] << std::endl;
 		++edges;
-		std::cout << "edges[" << edges << "]" << std::endl;
+		//std::cout << "edges[" << edges << "]" << std::endl;
     }
     template <class Vertex, class Graph>
     void finish_vertex(Vertex u, const Graph&)
@@ -93,7 +93,7 @@ public:
 		if(u == 0)
 		{
 			cabe = edges - vertices + 2;
-			std::cout << "cabe = edges[" << edges << "] - vertices[" << vertices << "] + 2 = " << cabe << std::endl;
+			//std::cout << "cabe = edges[" << edges << "] - vertices[" << vertices << "] + 2 = " << cabe << std::endl;
 		}
 #endif
 		if(complexity[u] == 0)
@@ -102,9 +102,9 @@ public:
 		if(u != 0)
 			if(parent[u].defined_)
 			{
-				std::cout << "C " << complexity[parent[u]] << " + " << complexity[u] << " = ";
+				//std::cout << "C " << complexity[parent[u]] << " + " << complexity[u] << " = ";
 				complexity[parent[u]] += complexity[u];
-				std::cout << complexity[parent[u]] << std::endl;
+				//std::cout << complexity[parent[u]] << std::endl;
 			}
     }
 private:

@@ -1,4 +1,5 @@
-#SET(CMAKE_VERBOSE_MAKEFILE TRUE)
+cmake_minimum_required(VERSION 2.8)
+SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 ENABLE_TESTING()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -Wall -Wextra -DIN_GCC")

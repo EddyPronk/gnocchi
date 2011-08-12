@@ -145,7 +145,7 @@ void Analyser::process(const gcov_reader& reader)
 	}
 }
 
-void Analyser::report(int npath_threshold)
+void Analyser::report(int /*npath_threshold*/)
 {
 	function_index::iterator pos = functions.begin();
 	function_index::iterator end = functions.end();
